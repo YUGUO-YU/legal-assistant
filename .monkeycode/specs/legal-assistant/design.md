@@ -817,41 +817,129 @@ public class LegalMcpServer {
 }
 ```
 
-### 11.4 法律 Skills
+### 11.4 OpenClaw Skills 列表
 
-OpenClaw Skills 是预定义的 AI 工作流：
+OpenClaw Skills 是预定义的 AI 工作流，托管在 ClawHub (clawhub.ai)：
+
+#### 法律领域 Skills
 
 | Skill | 功能 | 描述 |
 |-------|------|------|
-| legal-qa | 法律问答 | 回答一般法律问题，提供法律建议 |
-| case-analysis | 案例分析 | 分析案例细节，推荐相似案例 |
-| document-review | 文书审查 | 审查合同条款，识别法律风险 |
-| law-research | 法律研究 | 检索法规，分析法律适用 |
+| china-legal-query | 中国法律查询 | 查询中国法律法规、司法解释 |
+| china-contract-review | 中国合同审查 | 审查各类合同，识别法律风险点 |
+| china-legal-analysis | 中国法律分析 | 分析法律问题，提供法律建议 |
+| mova-contract-generation | 合同智能生成 | 根据模板和参数生成法律合同 |
+| regulation-monitor | 法规监控 | 监控法规更新，推送变化通知 |
+| china-company-search | 中国企业查询 | 查询企业工商信息、股东穿透 |
+| caseclaw | 案例分析 | 裁判文书检索、相似案例推荐 |
 
-#### Skill 配置示例
+#### 通用工具 Skills
 
-```markdown
-# legal-qa/SKILL.md
+| Skill | 功能 | 描述 |
+|-------|------|------|
+| web-search | 网页搜索 | 搜索互联网信息 |
+| internet-search | 互联网搜索 | 全网信息检索 |
+| document-pro | 文档专业版 | 文档处理、格式转换、内容提取 |
 
-## 描述
-专业法律问答助手，帮助用户解答一般法律问题。
+### 11.5 Skills 安装配置
 
-## 工具
-- case_search: 搜索相关案例
-- law_search: 检索相关法规
+#### Skills 目录结构
 
-## 工作流程
-1. 理解用户法律问题
-2. 搜索相关案例和法规
-3. 综合分析给出回答
-4. 提醒用户寻求专业律师意见
-
-## 限制
-- 不提供正式法律意见
-- 不替代律师专业服务
+```
+openclaw/.openclaw/workspace/skills/
+├── china-legal-query/           # 中国法律查询
+├── china-contract-review/       # 中国合同审查
+├── china-legal-analysis/        # 中国法律分析
+├── mova-contract-generation/    # 合同智能生成
+├── regulation-monitor/          # 法规监控
+├── web-search/                 # 网页搜索
+├── internet-search/            # 互联网搜索
+├── document-pro/               # 文档专业版
+├── china-company-search/        # 中国企业查询
+├── caseclaw/                   # 案例分析
+└── legal-qa/                   # 法律问答（自研）
 ```
 
-### 11.5 OpenClaw 配置
+#### Skill 安装命令
+
+```bash
+# 安装法律领域 Skills
+openclaw skills add clawhub/china-legal-query
+openclaw skills add clawhub/china-contract-review
+openclaw skills add clawhub/china-legal-analysis
+openclaw skills add clawhub/mova-contract-generation
+openclaw skills add clawhub/regulation-monitor
+openclaw skills add clawhub/china-company-search
+openclaw skills add clawhub/caseclaw
+
+# 安装通用工具 Skills
+openclaw skills add clawhub/web-search
+openclaw skills add clawhub/internet-search
+openclaw skills add clawhub/document-pro
+
+# 或使用 clawhub CLI 安装
+clawhub install china-legal-query --skill-dir ~/.openclaw/workspace/skills
+```
+
+### 11.6 Skill 配置示例
+
+#### SKILL.md 示例
+
+```markdown
+# china-legal-query/SKILL.md
+
+## 名称
+china-legal-query
+
+## 描述
+专业中国法律查询助手，帮助用户检索法律法规、司法解释和规范性文件。
+
+## 触发词
+- "查一下这个法规"
+- "这条法律怎么规定的"
+- "相关法律规定"
+
+## 工具
+- law_search: 检索法律法规
+- law_detail: 获取法规详情
+- related_laws: 获取相关法规
+
+## 工作流程
+1. 理解用户查询意图
+2. 调用 law_search 检索相关法规
+3. 返回相关法规条款
+4. 如需要，调用 related_laws 获取关联法规
+
+## 输出格式
+- 法规名称和文号
+- 主要条款内容
+- 生效日期和时效状态
+- 相关法规推荐
+```
+
+#### OpenClaw Agent 配置
+
+```json
+// openclaw/.openclaw/workspace/AGENTS.md
+---
+agent: legal-assistant
+model: openai/gpt-4
+skills:
+  - china-legal-query
+  - china-contract-review
+  - china-legal-analysis
+  - mova-contract-generation
+  - regulation-monitor
+  - web-search
+  - document-pro
+tools:
+  browser:
+    enabled: true
+  sessions:
+    enabled: true
+```
+
+### 11.7 OpenClaw 配置
 
 ```json
 // openclaw/.openclaw/config/openclaw.json
@@ -880,7 +968,18 @@ OpenClaw Skills 是预定义的 AI 工作流：
   "agents": {
     "defaults": {
       "model": "openai/gpt-4",
-      "skills": ["legal-qa", "case-analysis", "document-review"]
+      "skills": [
+        "china-legal-query",
+        "china-contract-review",
+        "china-legal-analysis",
+        "mova-contract-generation",
+        "regulation-monitor",
+        "web-search",
+        "internet-search",
+        "document-pro",
+        "china-company-search",
+        "caseclaw"
+      ]
     }
   },
   "mcp": {
@@ -894,7 +993,7 @@ OpenClaw Skills 是预定义的 AI 工作流：
 }
 ```
 
-### 11.6 渠道接入配置
+### 11.8 渠道接入配置
 
 #### 微信接入 (企业微信)
 
@@ -920,7 +1019,7 @@ telegram:
     - ${ALLOWED_TELEGRAM_USERS}
 ```
 
-### 11.7 OpenClaw 启动
+### 11.9 OpenClaw 启动
 
 ```bash
 # 1. 安装 OpenClaw
@@ -930,15 +1029,59 @@ npm install -g openclaw@latest
 cd openclaw
 openclaw setup
 
-# 3. 启动网关
+# 3. 安装法律 Skills
+openclaw skills add clawhub/china-legal-query
+openclaw skills add clawhub/china-contract-review
+openclaw skills add clawhub/china-legal-analysis
+openclaw skills add clawhub/mova-contract-generation
+openclaw skills add clawhub/regulation-monitor
+openclaw skills add clawhub/china-company-search
+openclaw skills add clawhub/caseclaw
+openclaw skills add clawhub/web-search
+openclaw skills add clawhub/internet-search
+openclaw skills add clawhub/document-pro
+
+# 4. 启动网关
 openclaw gateway --port 18789
 
-# 4. 启动 MCP Server (在 server 目录)
+# 5. 启动 MCP Server (在 server 目录)
 cd ../server
 mvn spring-boot:run
 
-# 5. 通过 Docker 启动所有服务
+# 6. 通过 Docker 启动所有服务
 docker-compose up -d
+```
+
+### 11.10 Skills 安装脚本
+
+```bash
+#!/bin/bash
+# scripts/install-legal-skills.sh
+
+SKILLS_DIR="$HOME/.openclaw/workspace/skills"
+
+echo "安装法律助手 Skills..."
+
+# 法律领域 Skills
+SKILLS=(
+  "clawhub/china-legal-query"
+  "clawhub/china-contract-review"
+  "clawhub/china-legal-analysis"
+  "clawhub/mova-contract-generation"
+  "clawhub/regulation-monitor"
+  "clawhub/china-company-search"
+  "clawhub/caseclaw"
+  "clawhub/web-search"
+  "clawhub/internet-search"
+  "clawhub/document-pro"
+)
+
+for skill in "${SKILLS[@]}"; do
+  echo "安装 $skill..."
+  openclaw skills add "$skill"
+done
+
+echo "Skills 安装完成！"
 ```
 
 ## 12. 验收标准
@@ -962,9 +1105,15 @@ docker-compose up -d
 | AI | 微信接入 | 可通过企业微信与 AI 助手对话 |
 | AI | Telegram 接入 | 可通过 Telegram Bot 与 AI 助手对话 |
 | AI | Web 对话 | 可在 Web 端与 AI 助手对话 |
-| AI | 法律问答 | AI 可回答一般法律问题 |
-| AI | 案例分析 | AI 可分析案例并推荐相似案例 |
-| AI | 文书审查 | AI 可审查合同并识别风险 |
+| AI | 法律查询 | 可使用 china-legal-query 检索法规 |
+| AI | 合同审查 | 可使用 china-contract-review 审查合同 |
+| AI | 法律分析 | 可使用 china-legal-analysis 分析法律问题 |
+| AI | 合同生成 | 可使用 mova-contract-generation 生成合同 |
+| AI | 法规监控 | 可使用 regulation-monitor 监控法规更新 |
+| AI | 企业查询 | 可使用 china-company-search 查询企业 |
+| AI | 案例分析 | 可使用 caseclaw 分析案例 |
+| AI | 网页搜索 | 可使用 web-search 搜索网页 |
+| AI | 文档处理 | 可使用 document-pro 处理文档 |
 
 ### 12.2 性能验收
 

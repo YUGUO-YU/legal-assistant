@@ -849,6 +849,41 @@ openclaw gateway --port 18789
 docker-compose up -d
 ```
 
+### 9.7 安装法律 Skills
+
+```bash
+# 安装所有法律 Skills
+openclaw skills add clawhub/china-legal-query
+openclaw skills add clawhub/china-contract-review
+openclaw skills add clawhub/china-legal-analysis
+openclaw skills add clawhub/mova-contract-generation
+openclaw skills add clawhub/regulation-monitor
+openclaw skills add clawhub/china-company-search
+openclaw skills add clawhub/caseclaw
+openclaw skills add clawhub/web-search
+openclaw skills add clawhub/internet-search
+openclaw skills add clawhub/document-pro
+
+# 或使用批量安装脚本
+bash scripts/install-legal-skills.sh
+```
+
+### 9.8 Skills 列表
+
+| Skill | 功能 | 来源 |
+|-------|------|------|
+| china-legal-query | 中国法律查询 | ClawHub |
+| china-contract-review | 中国合同审查 | ClawHub |
+| china-legal-analysis | 中国法律分析 | ClawHub |
+| mova-contract-generation | 合同智能生成 | ClawHub |
+| regulation-monitor | 法规监控 | ClawHub |
+| web-search | 网页搜索 | ClawHub |
+| internet-search | 互联网搜索 | ClawHub |
+| document-pro | 文档专业版 | ClawHub |
+| china-company-search | 中国企业查询 | ClawHub |
+| caseclaw | 案例分析 | ClawHub |
+```
+
 ### 9.7 测试 AI 对话
 
 ```bash

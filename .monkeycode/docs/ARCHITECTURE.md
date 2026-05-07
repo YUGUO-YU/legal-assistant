@@ -493,11 +493,24 @@ graph TB
 | company_search | 企业查询 | 查询企业工商信息 |
 | document_review | 文书审查 | 审查合同条款风险 |
 
-### 9.4 法律 Skills
+### 9.4 OpenClaw Skills
 
-| Skill | 功能 | 描述 |
+#### 法律领域 Skills
+
+| Skill | 功能 | 来源 |
 |-------|------|------|
-| legal-qa | 法律问答 | 回答一般法律问题 |
-| case-analysis | 案例分析 | 分析案例并推荐相似案例 |
-| document-review | 文书审查 | 审查合同并识别风险 |
-| law-research | 法律研究 | 检索和分析法律适用 |
+| china-legal-query | 中国法律查询 | ClawHub |
+| china-contract-review | 中国合同审查 | ClawHub |
+| china-legal-analysis | 中国法律分析 | ClawHub |
+| mova-contract-generation | 合同智能生成 | ClawHub |
+| regulation-monitor | 法规监控 | ClawHub |
+| china-company-search | 中国企业查询 | ClawHub |
+| caseclaw | 案例分析 | ClawHub |
+
+#### 通用工具 Skills
+
+| Skill | 功能 | 来源 |
+|-------|------|------|
+| web-search | 网页搜索 | ClawHub |
+| internet-search | 互联网搜索 | ClawHub |
+| document-pro | 文档专业版 | ClawHub |
