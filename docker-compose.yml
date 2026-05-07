@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # OpenClaw Gateway
+  gateway:
+    image: openclaw/gateway:latest
+    container_name: legal-assistant-gateway
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./config/gateway.yml:/app/config/gateway.yml
+      - ./skills:/app/skills
+    environment:
+      - OPENCLAW_API_KEY=${OPENCLAW_API_KEY}
+      - OPENCLAW_ENDPOINT=http://localhost:8090
+    restart: unless-stopped
+    networks:
+      - legal-network
+
+  # Legal Assistant Backend
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: legal-assistant-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - gateway
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - OPENCLAW_GATEWAY_URL=http://gateway:8090
+      - OPENCLAW_API_KEY=${OPENCLAW_API_KEY}
+    restart: unless-stopped
+    networks:
+      - legal-network
+
+networks:
+  legal-network:
+    driver: bridge

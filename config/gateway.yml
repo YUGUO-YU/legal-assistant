@@ -1,0 +1,31 @@
+server:
+  host: 0.0.0.0
+  port: 8090
+
+mcp:
+  servers:
+    legal:
+      type: websocket
+      url: ws://localhost:8080/mcp/legal
+      skills:
+        - china-legal-query
+        - china-contract-review
+        - china-legal-analysis
+        - mova-contract-generation
+        - regulation-monitor
+        - china-company-search
+        - caseclaw
+        - document-pro
+
+ai:
+  provider: openclaw
+  apiKey: ${OPENCLAW_API_KEY}
+  endpoint: ${OPENCLAW_ENDPOINT:-http://localhost:8090}
+
+logging:
+  level: info
+  format: json
+
+skills:
+  directory: ./skills
+  autoUpdate: false

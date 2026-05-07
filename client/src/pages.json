@@ -17,6 +17,102 @@
       "style": {
         "navigationBarTitleText": "注册"
       }
+    },
+    {
+      "path": "pages/document/list",
+      "style": {
+        "navigationBarTitleText": "我的文书"
+      }
+    },
+    {
+      "path": "pages/document/detail",
+      "style": {
+        "navigationBarTitleText": "文书详情"
+      }
+    },
+    {
+      "path": "pages/document/edit",
+      "style": {
+        "navigationBarTitleText": "编辑文书"
+      }
+    },
+    {
+      "path": "pages/case/search",
+      "style": {
+        "navigationBarTitleText": "案例搜索"
+      }
+    },
+    {
+      "path": "pages/case/detail",
+      "style": {
+        "navigationBarTitleText": "案例详情"
+      }
+    },
+    {
+      "path": "pages/law/search",
+      "style": {
+        "navigationBarTitleText": "法规查询"
+      }
+    },
+    {
+      "path": "pages/law/detail",
+      "style": {
+        "navigationBarTitleText": "法规详情"
+      }
+    },
+    {
+      "path": "pages/company/search",
+      "style": {
+        "navigationBarTitleText": "企业查询"
+      }
+    },
+    {
+      "path": "pages/company/detail",
+      "style": {
+        "navigationBarTitleText": "企业详情"
+      }
+    },
+    {
+      "path": "pages/lead/list",
+      "style": {
+        "navigationBarTitleText": "案源管理"
+      }
+    },
+    {
+      "path": "pages/lead/detail",
+      "style": {
+        "navigationBarTitleText": "案源详情"
+      }
+    },
+    {
+      "path": "pages/lead/create",
+      "style": {
+        "navigationBarTitleText": "创建案源"
+      }
+    },
+    {
+      "path": "pages/user/profile",
+      "style": {
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/user/edit-profile",
+      "style": {
+        "navigationBarTitleText": "编辑资料"
+      }
+    },
+    {
+      "path": "pages/user/settings",
+      "style": {
+        "navigationBarTitleText": "设置"
+      }
+    },
+    {
+      "path": "pages/ai/chat",
+      "style": {
+        "navigationBarTitleText": "AI 助手"
+      }
     }
   ],
   "globalStyle": {

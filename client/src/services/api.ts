@@ -84,4 +84,6 @@ class Request {
 
 export const api = new Request()
 
+export const request = api.request.bind(api)
+
 export default api
