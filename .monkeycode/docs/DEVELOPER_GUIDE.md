@@ -667,3 +667,220 @@ redis-cli ping
 2. 检查网络连通性
 3. 查看日志确认错误信息
 4. 联系第三方技术支持
+
+---
+
+## 9. OpenClaw AI 服务开发
+
+### 9.1 OpenClaw 项目结构
+
+```
+openclaw/
+├── .openclaw/
+│   ├── workspace/                    # AI 工作区
+│   │   ├── AGENTS.md                 # AI 代理配置
+│   │   ├── SOUL.md                   # AI 灵魂配置
+│   │   ├── TOOLS.md                  # 工具配置
+│   │   └── skills/                   # 技能包
+│   │       ├── legal-qa/            # 法律问答
+│   │       ├── case-analysis/        # 案例分析
+│   │       └── document-review/      # 文书审查
+│   └── config/
+│       └── openclaw.json             # OpenClaw 配置
+├── extensions/                        # OpenClaw 扩展
+│   └── legal-mcp/                   # 法律 MCP 客户端
+└── package.json
+```
+
+### 9.2 安装 OpenClaw
+
+```bash
+# 全局安装 OpenClaw
+npm install -g openclaw@latest
+
+# 初始化配置
+cd openclaw
+openclaw setup
+
+# 验证安装
+openclaw doctor
+```
+
+### 9.3 配置 OpenClaw
+
+```json
+// .openclaw/config/openclaw.json
+{
+  "gateway": {
+    "port": 18789,
+    "auth": {
+      "enabled": true,
+      "jwtSecret": "${JWT_SECRET}"
+    }
+  },
+  "channels": {
+    "wechat": {
+      "enabled": true,
+      "botType": "wework"
+    },
+    "telegram": {
+      "enabled": true,
+      "botToken": "${TELEGRAM_BOT_TOKEN}"
+    },
+    "webchat": {
+      "enabled": true
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "openai/gpt-4",
+      "skills": ["legal-qa", "case-analysis", "document-review"]
+    }
+  },
+  "mcp": {
+    "servers": [
+      {
+        "name": "legal-mcp",
+        "url": "http://localhost:8080/api/mcp"
+      }
+    ]
+  }
+}
+```
+
+### 9.4 创建法律 Skill
+
+#### Skill 目录结构
+
+```
+skills/legal-qa/
+├── SKILL.md          # Skill 定义
+├── prompt.md         # 提示词模板
+└── actions/          # 动作脚本
+    └── analyze.js
+```
+
+#### SKILL.md 示例
+
+```markdown
+# legal-qa/SKILL.md
+
+## 名称
+legal-qa
+
+## 描述
+专业法律问答助手，帮助用户解答一般法律问题。
+
+## 触发词
+- "法律问题"
+- "法律咨询"
+- "法律建议"
+
+## 工具
+- case_search: 搜索相关案例
+- law_search: 检索相关法规
+
+## 工作流程
+1. 理解用户法律问题
+2. 确定问题涉及的法律领域
+3. 搜索相关案例和法规
+4. 综合分析给出回答
+5. 提醒用户寻求专业律师意见
+
+## 输出格式
+- 法律领域分类
+- 相关法规条文
+- 类似案例参考
+- 一般性法律建议
+- 免责声明
+```
+
+### 9.5 开发法律 MCP Server
+
+MCP Server 提供 AI 可调用的工具：
+
+```java
+// LegalMcpServer.java
+@RestController
+@RequestMapping("/api/mcp")
+public class LegalMcpServer {
+
+    @Autowired
+    private CaseService caseService;
+
+    @Autowired
+    private LawService lawService;
+
+    @PostMapping("/tools/execute")
+    public Result<McpResponse> executeTool(@RequestBody McpRequest request) {
+        String toolName = request.getTool();
+        Map<String, Object> args = request.getArgs();
+
+        return switch (toolName) {
+            case "case_search" -> Result.success(executeCaseSearch(args));
+            case "law_search" -> Result.success(executeLawSearch(args));
+            case "company_search" -> Result.success(executeCompanySearch(args));
+            case "document_review" -> Result.success(executeDocumentReview(args));
+            default -> Result.error(4000, "Unknown tool: " + toolName);
+        };
+    }
+
+    private McpResponse executeCaseSearch(Map<String, Object> args) {
+        String keyword = (String) args.get("keyword");
+        String caseType = (String) args.get("caseType");
+        List<Case> cases = caseService.search(keyword, caseType);
+        return McpResponse.success(cases);
+    }
+}
+```
+
+### 9.6 启动服务
+
+```bash
+# 1. 启动后端 API 服务
+cd server
+mvn spring-boot:run
+
+# 2. 启动 OpenClaw Gateway
+cd openclaw
+openclaw gateway --port 18789
+
+# 3. 使用 Docker Compose 启动所有服务
+docker-compose up -d
+```
+
+### 9.7 测试 AI 对话
+
+```bash
+# 启动后，通过命令行测试
+openclaw agent --message "我签了一份租房合同，有什么需要注意的法律风险？"
+
+# 通过 Telegram 测试
+openclaw message send --target @your_telegram_username --message "法律问题"
+```
+
+### 9.8 渠道配置
+
+#### 企业微信配置
+
+```yaml
+# .openclaw/config/channels/wechat.yaml
+wechat:
+  botType: wework
+  corpId: ${WECORK_CORP_ID}
+  agentId: ${WECHAT_AGENT_ID}
+  secret: ${WECHAT_SECRET}
+  token: ${WECHAT_TOKEN}
+  encodingAesKey: ${WECHAT_AES_KEY}
+```
+
+#### Telegram 配置
+
+```yaml
+# .openclaw/config/channels/telegram.yaml
+telegram:
+  botToken: ${TELEGRAM_BOT_TOKEN}
+  dmPolicy: pairing
+  allowFrom:
+    - ${ALLOWED_TELEGRAM_USER_IDS}
+```

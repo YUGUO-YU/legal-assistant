@@ -15,10 +15,17 @@ graph TB
     subgraph 客户端
         WX["微信小程序"]
         WEB["Web 应用"]
+        WECHAT["微信"]
+        TELEGRAM["Telegram"]
     end
 
     subgraph 网关层
         GW["API 网关 / Nginx"]
+    end
+
+    subgraph AI 服务层
+        OC["OpenClaw Gateway"]
+        MCP["MCP Server"]
     end
 
     subgraph 后端服务
@@ -35,16 +42,22 @@ graph TB
     subgraph 第三方服务
         SMS["短信服务"]
         THIRD["第三方数据 API"]
+        LLM["大模型 API"]
     end
 
     WX --> GW
     WEB --> GW
+    WECHAT --> OC
+    TELEGRAM --> OC
     GW --> API
+    OC <--> MCP
+    MCP <--> API
     API --> DB
     API --> REDIS
     API --> OSS
     API --> SMS
     API --> THIRD
+    API --> LLM
     JOB --> DB
     JOB --> THIRD
 ```
@@ -76,7 +89,17 @@ graph TB
 | 验证 | Spring Validation | 参数校验 |
 | 任务调度 | XXL-Job | 分布式任务调度 |
 
-### 2.3 开发与部署
+### 2.3 AI 服务技术栈
+
+| 层级 | 技术 | 说明 |
+|-----|------|------|
+| AI 框架 | OpenClaw | 个人 AI 助手网关 (369k+ stars) |
+| 消息渠道 | 微信/Telegram/Web | 多渠道消息接入 |
+| 协议 | MCP (Model Context Protocol) | AI 工具集成协议 |
+| 法律 Skills | 自研法律技能包 | 案例分析、文书审查、法律问答 |
+| 大模型 | OpenAI / Claude / 本地模型 | AI 推理能力 |
+
+### 2.4 开发与部署
 
 | 类型 | 技术 | 说明 |
 |-----|------|------|
@@ -584,6 +607,85 @@ legal-assistant/
 │   │       │       ├── config/                        # 配置类
 │   │       │       │   ├── SecurityConfig.java         # 安全配置
 │   │       │       │   ├── RedisConfig.java            # Redis 配置
+│   │       │       │   ├── CorsConfig.java             # 跨域配置
+│   │       │       │   └── McpConfig.java              # MCP 协议配置
+│   │       │       ├── module/                         # 功能模块
+│   │       │       │   ├── auth/                       # 认证模块
+│   │       │       │   │   ├── controller/
+│   │       │       │   │   ├── service/
+│   │   │       │   │   ├── mapper/
+│   │   │       │   │   └── entity/
+│   │       │       │   ├── user/                       # 用户模块
+│   │       │       │   ├── document/                   # 文书模块
+│   │       │       │   ├── case/                       # 案例模块
+│   │       │       │   ├── law/                        # 法规模块
+│   │       │       │   ├── company/                    # 企业模块
+│   │       │       │   └── lead/                       # 案源模块
+│   │       │       ├── mcp/                            # MCP 服务
+│   │       │       │   ├── LegalMcpServer.java         # 法律 MCP 服务器
+│   │       │       │   ├── tools/                      # MCP 工具定义
+│   │       │       │   │   ├── case_search_tool.java
+│   │       │       │   │   ├── law_search_tool.java
+│   │       │       │   │   ├── company_search_tool.java
+│   │       │       │   │   └── document_tool.java
+│   │       │       │   └── handlers/                    # 工具处理器
+│   │       │       ├── common/                         # 公共模块
+│   │       │       │   ├── result/                     # 统一返回
+│   │       │       │   ├── exception/                  # 异常处理
+│   │       │       │   ├── security/                   # 安全相关
+│   │       │       │   └── utils/                      # 工具类
+│   │       │       └── dto/                            # 数据传输对象
+│   │       └── resources/
+│   │           ├── application.yml                      # 主配置文件
+│   │           ├── application-dev.yml                 # 开发环境配置
+│   │           └── mapper/                            # MyBatis XML
+│   ├── pom.xml                                         # Maven 配置
+│   └── src/test/                                       # 测试文件
+├── openclaw/                    # OpenClaw AI 服务
+│   ├── .openclaw/              # OpenClaw 工作区
+│   │   ├── workspace/
+│   │   │   ├── AGENTS.md       # AI 代理配置
+│   │   │   ├── SOUL.md         # AI 灵魂配置
+│   │   │   ├── TOOLS.md        # 工具配置
+│   │   │   └── skills/         # 法律技能包
+│   │   │       ├── legal-qa/   # 法律问答技能
+│   │   │       ├── case-analysis/  # 案例分析技能
+│   │   │       └── document-review/ # 文书审查技能
+│   │   └── config/
+│   │       └── openclaw.json   # OpenClaw 配置
+│   ├── extensions/              # OpenClaw 扩展
+│   │   └── legal-mcp/          # 法律 MCP 客户端扩展
+│   └── package.json
+├── client/                    # 前端（小程序/Web）
+│   ├── src/
+│   │   ├── pages/            # 页面
+│   │   ├── components/       # 组件
+│   │   ├── stores/           # 状态管理
+│   │   ├── services/         # API 服务
+│   │   ├── utils/            # 工具函数
+│   │   ├── static/           # 静态资源
+│   │   ├── App.vue           # 应用入口
+│   │   └── main.ts          # 主入口
+│   ├── public/              # 公共资源
+│   ├── package.json
+│   └── vite.config.ts
+├── docker/                   # Docker 配置
+├── scripts/                  # 脚本
+├── .env.example             # 环境变量示例
+├── docker-compose.yml       # Docker Compose 配置
+└── README.md                # 项目说明
+```
+legal-assistant/
+├── docs/                      # 项目文档
+├── server/                    # 后端服务 (Spring Boot)
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/legal/assistant/
+│   │       │       ├── LegalAssistantApplication.java  # 启动类
+│   │       │       ├── config/                        # 配置类
+│   │       │       │   ├── SecurityConfig.java         # 安全配置
+│   │       │       │   ├── RedisConfig.java            # Redis 配置
 │   │       │       │   └── CorsConfig.java             # 跨域配置
 │   │       │       ├── module/                         # 功能模块
 │   │       │       │   ├── auth/                       # 认证模块
@@ -629,9 +731,219 @@ legal-assistant/
 └── README.md                # 项目说明
 ```
 
-## 11. 验收标准
+## 11. OpenClaw AI 服务集成
 
-### 11.1 功能验收
+### 11.1 OpenClaw 简介
+
+OpenClaw 是一个开源的个人 AI 助手框架（369k+ stars, MIT 协议），支持多渠道消息接入和 MCP 协议扩展。
+
+**核心特性**：
+- 多渠道接入：微信、Telegram、Slack、Discord、WebChat 等
+- 多 Agent 路由：支持为不同用户/渠道配置独立 Agent
+- Skills 系统：可通过 Skill 包扩展功能
+- MCP 协议：标准化 AI 工具集成
+- 语音支持：Voice Wake + Talk Mode
+
+### 11.2 集成架构
+
+```mermaid
+graph TB
+    subgraph 消息渠道
+        WX["微信"]
+        TG["Telegram"]
+        WEB_CHAT["WebChat"]
+    end
+
+    subgraph OpenClaw
+        OC_GW["OpenClaw Gateway"]
+        OC_SKILL["法律 Skills"]
+        OC_MCP["MCP Client"]
+    end
+
+    subgraph MCP 协议
+        MCP_SERVER["法律 MCP Server"]
+        TOOLS["Tools"]
+    end
+
+    subgraph Spring Boot
+        API["API 服务"]
+        DB["数据库"]
+    end
+
+    WX --> OC_GW
+    TG --> OC_GW
+    WEB_CHAT --> OC_GW
+    OC_GW --> OC_SKILL
+    OC_GW --> OC_MCP
+    OC_MCP <--> MCP_SERVER
+    MCP_SERVER --> API
+    API --> DB
+```
+
+### 11.3 法律 MCP Server
+
+MCP Server 提供 AI 工具调用后端能力：
+
+```java
+// 法律 MCP Server 工具定义
+public class LegalMcpServer {
+    // 案例搜索工具
+    @Tool(name = "case_search", description = "搜索裁判文书案例")
+    public List<Case> searchCases(
+        @Argument(name = "keyword") String keyword,
+        @Argument(name = "case_type") String caseType,
+        @Argument(name = "region") String region
+    ) { ... }
+
+    // 法规搜索工具
+    @Tool(name = "law_search", description = "搜索法律法规")
+    public List<Law> searchLaws(
+        @Argument(name = "keyword") String keyword,
+        @Argument(name = "level") String level
+    ) { ... }
+
+    // 企业查询工具
+    @Tool(name = "company_search", description = "查询企业工商信息")
+    public Company searchCompany(
+        @Argument(name = "name") String name
+    ) { ... }
+
+    // 文书处理工具
+    @Tool(name = "document_review", description = "审查法律文书")
+    public ReviewResult reviewDocument(
+        @Argument(name = "content") String content,
+        @Argument(name = "doc_type") String docType
+    ) { ... }
+}
+```
+
+### 11.4 法律 Skills
+
+OpenClaw Skills 是预定义的 AI 工作流：
+
+| Skill | 功能 | 描述 |
+|-------|------|------|
+| legal-qa | 法律问答 | 回答一般法律问题，提供法律建议 |
+| case-analysis | 案例分析 | 分析案例细节，推荐相似案例 |
+| document-review | 文书审查 | 审查合同条款，识别法律风险 |
+| law-research | 法律研究 | 检索法规，分析法律适用 |
+
+#### Skill 配置示例
+
+```markdown
+# legal-qa/SKILL.md
+
+## 描述
+专业法律问答助手，帮助用户解答一般法律问题。
+
+## 工具
+- case_search: 搜索相关案例
+- law_search: 检索相关法规
+
+## 工作流程
+1. 理解用户法律问题
+2. 搜索相关案例和法规
+3. 综合分析给出回答
+4. 提醒用户寻求专业律师意见
+
+## 限制
+- 不提供正式法律意见
+- 不替代律师专业服务
+```
+
+### 11.5 OpenClaw 配置
+
+```json
+// openclaw/.openclaw/config/openclaw.json
+{
+  "gateway": {
+    "port": 18789,
+    "auth": {
+      "enabled": true,
+      "jwtSecret": "${JWT_SECRET}"
+    }
+  },
+  "channels": {
+    "wechat": {
+      "enabled": true,
+      "botType": "wework"
+    },
+    "telegram": {
+      "enabled": true,
+      "botToken": "${TELEGRAM_BOT_TOKEN}"
+    },
+    "webchat": {
+      "enabled": true,
+      "webSocketPath": "/ws/chat"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "openai/gpt-4",
+      "skills": ["legal-qa", "case-analysis", "document-review"]
+    }
+  },
+  "mcp": {
+    "servers": [
+      {
+        "name": "legal-mcp",
+        "url": "http://localhost:8080/api/mcp"
+      }
+    ]
+  }
+}
+```
+
+### 11.6 渠道接入配置
+
+#### 微信接入 (企业微信)
+
+```yaml
+# openclaw/.openclaw/config/channels/wechat.yaml
+wechat:
+  botType: wework
+  corpId: ${WECORK_CORP_ID}
+  agentId: ${WECHAT_AGENT_ID}
+  secret: ${WECHAT_SECRET}
+  token: ${WECHAT_TOKEN}
+  encodingAesKey: ${WECHAT_AES_KEY}
+```
+
+#### Telegram 接入
+
+```yaml
+# openclaw/.openclaw/config/channels/telegram.yaml
+telegram:
+  botToken: ${TELEGRAM_BOT_TOKEN}
+  dmPolicy: pairing
+  allowFrom:
+    - ${ALLOWED_TELEGRAM_USERS}
+```
+
+### 11.7 OpenClaw 启动
+
+```bash
+# 1. 安装 OpenClaw
+npm install -g openclaw@latest
+
+# 2. 初始化配置
+cd openclaw
+openclaw setup
+
+# 3. 启动网关
+openclaw gateway --port 18789
+
+# 4. 启动 MCP Server (在 server 目录)
+cd ../server
+mvn spring-boot:run
+
+# 5. 通过 Docker 启动所有服务
+docker-compose up -d
+```
+
+## 12. 验收标准
+
+### 12.1 功能验收
 
 | 模块 | 功能点 | 验收标准 |
 |-----|-------|---------|
@@ -647,14 +959,21 @@ legal-assistant/
 | 企业 | 企业搜索 | 可通过名称查询企业信息 |
 | 企业 | 企业详情 | 可查看工商、股东、风险信息 |
 | 案源 | 案源管理 | 可添加、编辑、跟踪案源线索 |
+| AI | 微信接入 | 可通过企业微信与 AI 助手对话 |
+| AI | Telegram 接入 | 可通过 Telegram Bot 与 AI 助手对话 |
+| AI | Web 对话 | 可在 Web 端与 AI 助手对话 |
+| AI | 法律问答 | AI 可回答一般法律问题 |
+| AI | 案例分析 | AI 可分析案例并推荐相似案例 |
+| AI | 文书审查 | AI 可审查合同并识别风险 |
 
-### 11.2 性能验收
+### 12.2 性能验收
 
 - 页面首屏加载时间 < 3 秒
 - 搜索接口响应时间 < 2 秒
 - 支持 100 并发用户
+- AI 对话响应时间 < 5 秒
 
-### 11.3 安全验收
+### 12.3 安全验收
 
 - 密码加密存储
 - JWT Token 有效期内可正常使用

@@ -27,6 +27,18 @@ graph TB
     subgraph 客户端层
         WX["微信小程序"]
         WEB["Web 应用 H5"]
+        WECHAT["微信"]
+        TELEGRAM["Telegram"]
+    end
+
+    subgraph AI 服务层
+        OC["OpenClaw Gateway"]
+        OC_SKILL["法律 Skills"]
+        OC_MCP["MCP Client"]
+    end
+
+    subgraph MCP 协议层
+        MCP["法律 MCP Server"]
     end
 
     subgraph 网关层
@@ -49,17 +61,25 @@ graph TB
         SMS["腾讯云短信"]
         WX["微信 API"]
         THIRD["第三方数据 API"]
+        LLM["大模型 API"]
     end
 
     WX --> NGINX
     WEB --> NGINX
+    WECHAT --> OC
+    TELEGRAM --> OC
+    OC --> OC_SKILL
+    OC --> OC_MCP
+    OC_MCP <--> MCP
     NGINX --> API
+    MCP --> API
     API --> MYSQL
     API --> REDIS
     API --> OSS
     API --> SMS
     API --> WX
     API --> THIRD
+    API --> LLM
     JOB --> MYSQL
     JOB --> THIRD
 ```
@@ -89,6 +109,16 @@ graph TB
 | 文件存储 | 腾讯云 COS | 对象存储服务 |
 | 认证 | JWT | 无状态身份令牌 |
 | 任务调度 | XXL-Job | 分布式任务调度 |
+
+#### AI 服务技术栈
+
+| 类别 | 技术选型 | 说明 |
+|-----|---------|------|
+| AI 框架 | OpenClaw | 个人 AI 助手网关 (369k+ stars) |
+| 消息渠道 | 微信/Telegram/WebChat | 多渠道消息接入 |
+| 协议 | MCP (Model Context Protocol) | AI 工具集成协议 |
+| 法律 Skills | 自研法律技能包 | 案例分析、文书审查、法律问答 |
+| 大模型 | OpenAI / Claude / 本地模型 | AI 推理能力 |
 
 ---
 
@@ -392,3 +422,82 @@ graph LR
 - 微服务架构预留
 - 消息队列解耦（后期引入）
 - 插件机制扩展功能
+
+---
+
+## 9. OpenClaw AI 服务架构
+
+### 9.1 OpenClaw 简介
+
+OpenClaw 是一个开源的个人 AI 助手框架（369k+ stars, MIT 协议），提供：
+- 多渠道消息接入（微信、Telegram、Slack、Discord、WebChat 等）
+- 多 Agent 路由和会话管理
+- Skills 系统扩展功能
+- MCP 协议集成外部工具
+- Voice Wake + Talk Mode 语音支持
+
+### 9.2 集成架构
+
+```mermaid
+graph TB
+    subgraph 消息渠道
+        WX["微信"]
+        TG["Telegram"]
+        WEB_CHAT["WebChat"]
+    end
+
+    subgraph OpenClaw Gateway
+        OC_GW["Gateway"]
+        OC_SESSION["Session Manager"]
+        OC_SKILL["Skills Engine"]
+        OC_MCP["MCP Client"]
+    end
+
+    subgraph 法律 MCP Server
+        MCP_TOOLS["Tools"]
+        MCP_CASE["案例搜索"]
+        MCP_LAW["法规检索"]
+        MCP_COMPANY["企业查询"]
+        MCP_DOC["文书处理"]
+    end
+
+    subgraph Spring Boot API
+        API["API 服务"]
+        DB["数据库"]
+    end
+
+    WX --> OC_GW
+    TG --> OC_GW
+    WEB_CHAT --> OC_GW
+    OC_GW --> OC_SESSION
+    OC_GW --> OC_SKILL
+    OC_GW --> OC_MCP
+    OC_MCP --> MCP_TOOLS
+    MCP_TOOLS --> MCP_CASE
+    MCP_TOOLS --> MCP_LAW
+    MCP_TOOLS --> MCP_COMPANY
+    MCP_TOOLS --> MCP_DOC
+    MCP_CASE --> API
+    MCP_LAW --> API
+    MCP_COMPANY --> API
+    MCP_DOC --> API
+    API --> DB
+```
+
+### 9.3 法律 MCP Tools
+
+| Tool | 功能 | 描述 |
+|------|------|------|
+| case_search | 案例搜索 | 搜索裁判文书案例 |
+| law_search | 法规检索 | 搜索法律法规条文 |
+| company_search | 企业查询 | 查询企业工商信息 |
+| document_review | 文书审查 | 审查合同条款风险 |
+
+### 9.4 法律 Skills
+
+| Skill | 功能 | 描述 |
+|-------|------|------|
+| legal-qa | 法律问答 | 回答一般法律问题 |
+| case-analysis | 案例分析 | 分析案例并推荐相似案例 |
+| document-review | 文书审查 | 审查合同并识别风险 |
+| law-research | 法律研究 | 检索和分析法律适用 |
