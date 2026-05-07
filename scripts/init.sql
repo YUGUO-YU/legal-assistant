@@ -54,9 +54,10 @@ CREATE TABLE IF NOT EXISTS `document` (
     `user_id` CHAR(36) NOT NULL COMMENT '用户ID',
     `case_id` CHAR(36) COMMENT '关联案件ID',
     `title` VARCHAR(500) NOT NULL COMMENT '文书标题',
-    `doc_type` ENUM('contract', 'litigation', 'non_litigation', 'other') NOT NULL COMMENT '文书类型',
+    `doc_type` VARCHAR(50) NOT NULL COMMENT '文书类型: contract/agreement/letter/other',
     `content` LONGTEXT COMMENT '文书内容',
-    `status` ENUM('draft', 'final', 'archived') DEFAULT 'draft' COMMENT '状态',
+    `status` VARCHAR(20) DEFAULT 'draft' COMMENT '状态: draft/review/approved/archived',
+    `word_count` INT DEFAULT 0 COMMENT '字数统计',
     `version` INT DEFAULT 1 COMMENT '版本号',
     `deleted` TINYINT DEFAULT 0 COMMENT '删除标记',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -64,6 +65,7 @@ CREATE TABLE IF NOT EXISTS `document` (
     INDEX `idx_user_id` (`user_id`),
     INDEX `idx_case_id` (`case_id`),
     INDEX `idx_doc_type` (`doc_type`),
+    INDEX `idx_status` (`status`),
     FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文书表';
 
@@ -101,8 +103,8 @@ CREATE TABLE IF NOT EXISTS `lead` (
     `title` VARCHAR(500) NOT NULL COMMENT '案源标题',
     `description` TEXT COMMENT '描述',
     `source` VARCHAR(100) COMMENT '来源',
-    `tags` JSON COMMENT '标签',
-    `status` ENUM('new', 'contacted', 'following', 'converted', 'discarded') DEFAULT 'new' COMMENT '状态',
+    `tags` VARCHAR(1000) COMMENT '标签(逗号分隔)',
+    `status` VARCHAR(20) DEFAULT 'new' COMMENT '状态: new/following/closed',
     `deleted` TINYINT DEFAULT 0 COMMENT '删除标记',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -123,3 +125,24 @@ CREATE TABLE IF NOT EXISTS `sms_code` (
     INDEX `idx_phone` (`phone`),
     INDEX `idx_expires_at` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='短信验证码表';
+
+-- ============================================
+-- 测试数据
+-- ============================================
+
+-- 插入测试用户 (密码: 123456, BCrypt加密)
+INSERT INTO `user` (`id`, `phone`, `email`, `password_hash`, `nickname`, `role`, `status`) VALUES
+('550e8400-e29b-41d4-a716-446655440001', '13800138000', 'lawyer@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMy.Mrq4L0p5Vv9M8J8W0zZ8Z8Z8Z8Z8Z8', '张律师', 'lawyer', 1),
+('550e8400-e29b-41d4-a716-446655440002', '13800138001', 'user@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMy.Mrq4L0p5Vv9M8J8W0zZ8Z8Z8Z8Z8Z8', '李用户', 'user', 1);
+
+-- 插入测试案源
+INSERT INTO `lead` (`id`, `user_id`, `title`, `description`, `source`, `tags`, `status`) VALUES
+('660e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', '婚姻家庭纠纷咨询', '客户咨询离婚财产分割问题，金额约500万', '客户推荐', '婚姻家庭,财产分割', 'following'),
+('660e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', '合同违约案件', '某公司违约拖欠货款约200万元', '线上推广', '合同纠纷,民事', 'new'),
+('660e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001', '劳动仲裁案件', '员工要求支付拖欠工资及经济补偿金', '同行介绍', '劳动纠纷,仲裁', 'closed');
+
+-- 插入测试文书
+INSERT INTO `document` (`id`, `user_id`, `title`, `doc_type`, `content`, `status`, `word_count`) VALUES
+('770e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', '房屋租赁合同', 'contract', '甲方（出租人）：XXX\n乙方（承租人）：XXX\n...', 'approved', 2500),
+('770e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', '离婚协议书', 'agreement', '协议人（男方）：XXX\n协议人（女方）：XXX\n...', 'draft', 1800),
+('770e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001', '律师函', 'letter', '致：XXX公司\n...', 'review', 800);
