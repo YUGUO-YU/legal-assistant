@@ -30,9 +30,9 @@
 - **UI 组件**：uView / Element Plus
 
 ### 后端
-- **运行时**：Node.js 18+
-- **框架**：NestJS
-- **ORM**：Prisma
+- **运行时**：Java 17+
+- **框架**：Spring Boot 3.x
+- **ORM**：MyBatis-Plus
 - **数据库**：MySQL 8.0
 - **缓存**：Redis 7.0
 

@@ -22,7 +22,7 @@ graph TB
     end
 
     subgraph 后端服务
-        API["API 服务 Node.js/Express"]
+        API["API 服务 Spring Boot"]
         JOB["定时任务服务"]
     end
 
@@ -66,14 +66,15 @@ graph TB
 
 | 层级 | 技术 | 说明 |
 |-----|------|------|
-| 运行时 | Node.js 18+ | JavaScript 运行时 |
-| Web 框架 | Express.js / NestJS | API 开发框架 |
-| ORM | Prisma | 数据库 ORM 框架 |
+| 运行时 | Java 17+ | JDK 17 LTS |
+| Web 框架 | Spring Boot 3.x | 企业级 Java 框架 |
+| ORM | MyBatis-Plus | 数据库 ORM 框架 |
 | 数据库 | MySQL 8.0 | 关系型数据库 |
 | 缓存 | Redis 7.0 | 缓存和会话存储 |
 | 对象存储 | 腾讯云 COS | 文件存储 |
 | 认证 | JWT | 无状态认证 |
-| 验证 | Joi / class-validator | 参数验证 |
+| 验证 | Spring Validation | 参数校验 |
+| 任务调度 | XXL-Job | 分布式任务调度 |
 
 ### 2.3 开发与部署
 
@@ -511,8 +512,8 @@ sequenceDiagram
 
 - 所有接口需要认证（公开接口除外）
 - 接口频率限制：普通用户 100 次/分钟
-- 参数验证：使用 Joi/class-validator
-- SQL 注入防护：使用 Prisma ORM 参数化查询
+- 参数验证：使用 Spring Validation 注解
+- SQL 注入防护：使用 MyBatis-Plus 参数绑定
 - XSS 防护：输入转义 + Content-Type 限制
 
 ### 8.3 数据安全
@@ -574,33 +575,40 @@ graph LR
 ```
 legal-assistant/
 ├── docs/                      # 项目文档
-├── server/                    # 后端服务
+├── server/                    # 后端服务 (Spring Boot)
 │   ├── src/
-│   │   ├── modules/          # 功能模块
-│   │   │   ├── auth/         # 认证模块
-│   │   │   ├── user/         # 用户模块
-│   │   │   ├── document/     # 文书模块
-│   │   │   ├── case/         # 案例模块
-│   │   │   ├── law/          # 法规模块
-│   │   │   ├── company/      # 企业模块
-│   │   │   └── lead/         # 案源模块
-│   │   ├── common/           # 公共模块
-│   │   │   ├── decorators/   # 装饰器
-│   │   │   ├── filters/      # 异常过滤器
-│   │   │   ├── guards/       # 路由守卫
-│   │   │   ├── interceptors/ # 拦截器
-│   │   │   └── middleware/   # 中间件
-│   │   ├── config/           # 配置文件
-│   │   ├── database/         # 数据库相关
-│   │   │   ├── prisma/       # Prisma 配置
-│   │   │   └── migrations/   # 数据库迁移
-│   │   ├── dto/              # 数据传输对象
-│   │   ├── entities/         # 实体定义
-│   │   ├── services/         # 业务服务
-│   │   └── main.ts           # 入口文件
-│   ├── test/                 # 测试文件
-│   ├── package.json
-│   └── tsconfig.json
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/legal/assistant/
+│   │       │       ├── LegalAssistantApplication.java  # 启动类
+│   │       │       ├── config/                        # 配置类
+│   │       │       │   ├── SecurityConfig.java         # 安全配置
+│   │       │       │   ├── RedisConfig.java            # Redis 配置
+│   │       │       │   └── CorsConfig.java             # 跨域配置
+│   │       │       ├── module/                         # 功能模块
+│   │       │       │   ├── auth/                       # 认证模块
+│   │       │       │   │   ├── controller/
+│   │       │       │   │   ├── service/
+│   │       │       │   │   ├── mapper/
+│   │       │       │   │   └── entity/
+│   │       │       │   ├── user/                       # 用户模块
+│   │       │       │   ├── document/                   # 文书模块
+│   │       │       │   ├── case/                       # 案例模块
+│   │       │       │   ├── law/                        # 法规模块
+│   │       │       │   ├── company/                   # 企业模块
+│   │       │       │   └── lead/                       # 案源模块
+│   │       │       ├── common/                         # 公共模块
+│   │       │       │   ├── result/                     # 统一返回
+│   │       │       │   ├── exception/                  # 异常处理
+│   │       │       │   ├── security/                   # 安全相关
+│   │       │       │   └── utils/                      # 工具类
+│   │       │       └── dto/                            # 数据传输对象
+│   │       └── resources/
+│   │           ├── application.yml                      # 主配置文件
+│   │           ├── application-dev.yml                 # 开发环境配置
+│   │           └── mapper/                              # MyBatis XML
+│   ├── pom.xml                                         # Maven 配置
+│   └── src/test/                                       # 测试文件
 ├── client/                    # 前端（小程序/Web）
 │   ├── src/
 │   │   ├── pages/            # 页面

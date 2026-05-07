@@ -81,13 +81,14 @@ graph TB
 
 | 类别 | 技术选型 | 说明 |
 |-----|---------|------|
-| 运行时 | Node.js 18+ | JavaScript 运行时环境 |
-| 框架 | NestJS | 企业级 Node.js 框架 |
-| ORM | Prisma | 现代数据库 ORM |
+| 运行时 | Java 17+ | JDK 17 LTS |
+| 框架 | Spring Boot 3.x | 企业级 Java 框架 |
+| ORM | MyBatis-Plus | 数据库 ORM |
 | 数据库 | MySQL 8.0 | 关系型数据库 |
 | 缓存 | Redis 7.0 | 高性能缓存 |
 | 文件存储 | 腾讯云 COS | 对象存储服务 |
 | 认证 | JWT | 无状态身份令牌 |
+| 任务调度 | XXL-Job | 分布式任务调度 |
 
 ---
 
