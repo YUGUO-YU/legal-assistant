@@ -226,7 +226,7 @@ public class LegalMcpHandler extends TextWebSocketHandler {
     private void sendError(WebSocketSession session, String message) {
         ObjectNode error = objectMapper.createObjectNode();
         error.put("jsonrpc", "2.0");
-        error.put("id", null);
+        error.putNull("id");
         error.set("error", createError(-32603, "Internal error", message));
         sendResponse(session, error);
     }

@@ -22,6 +22,7 @@ public class CaseSearchResponse {
     @AllArgsConstructor
     public static class CaseItem {
         private String id;
+        private String externalId;
         private String caseNumber;
         private String title;
         private String court;
@@ -30,5 +31,6 @@ public class CaseSearchResponse {
         private String judgmentDate;
         private String plaintiff;
         private String defendant;
+        private String source;
     }
 }

@@ -8,10 +8,20 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 import com.legal.assistant.mcp.handler.LegalMcpHandler;
+import com.legal.assistant.module.cases.service.CaseService;
+import com.legal.assistant.module.company.service.CompanyService;
+import com.legal.assistant.module.law.service.LawService;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSocket
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketConfigurer {
+
+    private final CaseService caseService;
+    private final LawService lawService;
+    private final CompanyService companyService;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -21,6 +31,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Bean
     public WebSocketHandler mcpHandler() {
-        return new LegalMcpHandler();
+        return new LegalMcpHandler(caseService, lawService, companyService);
     }
 }
