@@ -1,5 +1,6 @@
 package com.legal.assistant.common.exception;
 
+import com.legal.assistant.common.result.ResultCode;
 import lombok.Getter;
 
 @Getter
