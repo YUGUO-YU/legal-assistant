@@ -1,8 +1,8 @@
-package com.legal.assistant.module.case.controller;
+package com.legal.assistant.module.cases.controller;
 
 import com.legal.assistant.common.result.Result;
-import com.legal.assistant.module.case.dto.*;
-import com.legal.assistant.module.case.service.CaseService;
+import com.legal.assistant.module.cases.dto.*;
+import com.legal.assistant.module.cases.service.CaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

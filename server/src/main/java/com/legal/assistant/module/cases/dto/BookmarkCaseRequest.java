@@ -1,4 +1,4 @@
-package com.legal.assistant.module.case.dto;
+package com.legal.assistant.module.cases.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

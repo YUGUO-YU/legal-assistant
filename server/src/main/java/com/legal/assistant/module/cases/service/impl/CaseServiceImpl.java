@@ -1,12 +1,12 @@
-package com.legal.assistant.module.case.service.impl;
+package com.legal.assistant.module.cases.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.legal.assistant.common.exception.BusinessException;
 import com.legal.assistant.common.result.ResultCode;
-import com.legal.assistant.module.case.dto.*;
-import com.legal.assistant.module.case.entity.CaseBookmark;
-import com.legal.assistant.module.case.mapper.CaseBookmarkMapper;
-import com.legal.assistant.module.case.service.CaseService;
+import com.legal.assistant.module.cases.dto.*;
+import com.legal.assistant.module.cases.entity.CaseBookmark;
+import com.legal.assistant.module.cases.mapper.CaseBookmarkMapper;
+import com.legal.assistant.module.cases.service.CaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

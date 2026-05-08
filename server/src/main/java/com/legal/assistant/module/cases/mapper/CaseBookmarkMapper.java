@@ -1,7 +1,7 @@
-package com.legal.assistant.module.case.mapper;
+package com.legal.assistant.module.cases.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.legal.assistant.module.case.entity.CaseBookmark;
+import com.legal.assistant.module.cases.entity.CaseBookmark;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

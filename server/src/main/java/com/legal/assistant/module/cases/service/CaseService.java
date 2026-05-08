@@ -1,6 +1,6 @@
-package com.legal.assistant.module.case.service;
+package com.legal.assistant.module.cases.service;
 
-import com.legal.assistant.module.case.dto.*;
+import com.legal.assistant.module.cases.dto.*;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.legal.assistant.module.case.entity;
+package com.legal.assistant.module.cases.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

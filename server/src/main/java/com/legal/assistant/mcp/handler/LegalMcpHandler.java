@@ -3,7 +3,7 @@ package com.legal.assistant.mcp.handler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.legal.assistant.module.case.service.CaseService;
+import com.legal.assistant.module.cases.service.CaseService;
 import com.legal.assistant.module.company.service.CompanyService;
 import com.legal.assistant.module.law.service.LawService;
 import lombok.RequiredArgsConstructor;
@@ -155,7 +155,7 @@ public class LegalMcpHandler extends TextWebSocketHandler {
         try {
             switch (toolName) {
                 case "case_search":
-                    var caseReq = new com.legal.assistant.module.case.dto.CaseSearchRequest();
+                    var caseReq = new com.legal.assistant.module.cases.dto.CaseSearchRequest();
                     caseReq.setKeyword(arguments.path("keyword").asText());
                     caseReq.setPage(1);
                     caseReq.setPageSize(10);
