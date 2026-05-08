@@ -1,6 +1,7 @@
 package com.legal.assistant.module.document.service;
 
 import com.legal.assistant.module.document.dto.*;
+import java.util.List;
 
 public interface DocumentService {
     DocumentListResponse getList(String userId, String type, String status, String keyword, Integer page, Integer pageSize);
