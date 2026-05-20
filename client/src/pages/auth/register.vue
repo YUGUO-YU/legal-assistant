@@ -137,7 +137,8 @@ const sendCode = async () => {
   }
 
   try {
-    await request('/api/v1/auth/send-code', {
+    await request({
+      url: '/api/v1/auth/sms/send',
       method: 'POST',
       data: { phone: form.phone }
     })
@@ -168,7 +169,8 @@ const handleRegister = async () => {
   registering.value = true
 
   try {
-    await request('/api/v1/auth/register', {
+    await request({
+      url: '/api/v1/auth/register',
       method: 'POST',
       data: {
         username: form.username,

@@ -42,33 +42,38 @@ export interface CaseDetailResponse {
 
 export const caseApi = {
   search(params: CaseSearchRequest) {
-    return request<CaseSearchResponse>('/api/v1/cases/search', {
+    return request<CaseSearchResponse>({
+      url: '/api/v1/cases/search',
       method: 'GET',
-      params
+      data: params
     })
   },
 
   getDetail(id: string) {
-    return request<CaseDetailResponse>(`/api/v1/cases/${id}`, {
+    return request<CaseDetailResponse>({
+      url: `/api/v1/cases/${id}`,
       method: 'GET'
     })
   },
 
   getBookmarks() {
-    return request<CaseSearchResponse>('/api/v1/cases/bookmarks', {
+    return request<CaseItem[]>({
+      url: '/api/v1/cases/bookmarks',
       method: 'GET'
     })
   },
 
   addBookmark(id: string) {
-    return request('/api/v1/cases/bookmarks', {
+    return request({
+      url: '/api/v1/cases/bookmarks',
       method: 'POST',
       data: { caseId: id }
     })
   },
 
   removeBookmark(id: string) {
-    return request(`/api/v1/cases/bookmarks/${id}`, {
+    return request({
+      url: `/api/v1/cases/bookmarks/${id}`,
       method: 'DELETE'
     })
   }

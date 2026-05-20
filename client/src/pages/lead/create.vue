@@ -138,7 +138,7 @@ const handleCreate = async () => {
     uni.showToast({ title: '创建成功' })
     setTimeout(() => {
       uni.navigateTo({
-        url: `/pages/lead/detail?id=${res.id}`
+        url: `/pages/lead/detail?id=${res.data.id}`
       })
     }, 1500)
   } catch (e) {

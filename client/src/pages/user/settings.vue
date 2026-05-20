@@ -102,7 +102,7 @@ onMounted(() => {
 
 const loadSettings = () => {
   try {
-    const userInfo = uni.getStorageInfoSync()
+    const userInfo = uni.getStorageInfoSync() as any
     const size = userInfo.size
     if (size < 1024) {
       cacheSize.value = size + ' B'

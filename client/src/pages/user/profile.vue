@@ -102,7 +102,8 @@ onMounted(async () => {
 
 const loadProfile = async () => {
   try {
-    user.value = await userApi.getProfile()
+    const res = await userApi.getProfile()
+    user.value = res.data
   } catch (e) {
     console.error('加载用户信息失败', e)
   }

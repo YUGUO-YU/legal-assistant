@@ -78,13 +78,14 @@ const loadCompanies = async () => {
       pageSize: pageSize.value
     })
 
+    const data = res.data
     if (page.value === 1) {
-      companies.value = res.list || []
+      companies.value = data.list || []
     } else {
-      companies.value.push(...(res.list || []))
+      companies.value.push(...(data.list || []))
     }
 
-    noMore.value = (res.list || []).length < pageSize.value
+    noMore.value = (data.list || []).length < pageSize.value
   } catch (e) {
     console.error('搜索企业失败', e)
   } finally {

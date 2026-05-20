@@ -79,13 +79,14 @@ const loadLeads = async () => {
       pageSize.value
     )
 
+    const data = res.data
     if (page.value === 1) {
-      leads.value = res.list || []
+      leads.value = data.list || []
     } else {
-      leads.value.push(...(res.list || []))
+      leads.value.push(...(data.list || []))
     }
 
-    noMore.value = (res.list || []).length < pageSize.value
+    noMore.value = (data.list || []).length < pageSize.value
   } catch (e) {
     console.error('加载案源失败', e)
   } finally {

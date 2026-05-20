@@ -103,13 +103,14 @@ const loadDocuments = async () => {
       pageSize.value
     )
 
+    const data = res.data
     if (page.value === 1) {
-      documents.value = res.list || []
+      documents.value = data.list || []
     } else {
-      documents.value.push(...(res.list || []))
+      documents.value.push(...(data.list || []))
     }
 
-    noMore.value = (res.list || []).length < pageSize.value
+    noMore.value = (data.list || []).length < pageSize.value
   } catch (e) {
     console.error('加载文书失败', e)
   } finally {

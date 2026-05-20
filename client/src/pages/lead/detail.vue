@@ -88,7 +88,8 @@ onMounted(async () => {
 
 const loadLead = async () => {
   try {
-    lead.value = await leadApi.getById(leadId.value)
+    const res = await leadApi.getById(leadId.value)
+    lead.value = res.data
   } catch (e) {
     console.error('加载案源详情失败', e)
   }

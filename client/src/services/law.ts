@@ -36,14 +36,16 @@ export interface LawDetailResponse {
 
 export const lawApi = {
   search(params: LawSearchRequest) {
-    return request<LawSearchResponse>('/api/v1/laws/search', {
+    return request<LawSearchResponse>({
+      url: '/api/v1/laws/search',
       method: 'GET',
-      params
+      data: params
     })
   },
 
   getDetail(id: string) {
-    return request<LawDetailResponse>(`/api/v1/laws/${id}`, {
+    return request<LawDetailResponse>({
+      url: `/api/v1/laws/${id}`,
       method: 'GET'
     })
   }

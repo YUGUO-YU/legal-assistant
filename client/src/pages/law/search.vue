@@ -85,13 +85,14 @@ const loadLaws = async () => {
       pageSize: pageSize.value
     })
 
+    const data = res.data
     if (page.value === 1) {
-      laws.value = res.list || []
+      laws.value = data.list || []
     } else {
-      laws.value.push(...(res.list || []))
+      laws.value.push(...(data.list || []))
     }
 
-    noMore.value = (res.list || []).length < pageSize.value
+    noMore.value = (data.list || []).length < pageSize.value
   } catch (e) {
     console.error('搜索法规失败', e)
   } finally {

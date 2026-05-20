@@ -36,48 +36,53 @@ export interface UpdateDocumentRequest {
 
 export const documentApi = {
   getList(category?: string, page = 1, pageSize = 20) {
-    return request<DocumentListResponse>('/api/v1/documents', {
+    return request<DocumentListResponse>({
+      url: '/api/v1/documents',
       method: 'GET',
-      params: { category, page, pageSize }
+      data: { category, page, pageSize }
     })
   },
 
   getById(id: string) {
-    return request<DocumentItem>('/api/v1/documents/${id}'.replace('${id}', id), {
+    return request<DocumentItem>({
+      url: `/api/v1/documents/${id}`,
       method: 'GET'
     })
   },
 
   create(data: CreateDocumentRequest) {
-    return request<DocumentItem>('/api/v1/documents', {
+    return request<DocumentItem>({
+      url: '/api/v1/documents',
       method: 'POST',
       data
     })
   },
 
   update(id: string, data: UpdateDocumentRequest) {
-    return request<DocumentItem>('/api/v1/documents/${id}'.replace('${id}', id), {
+    return request<DocumentItem>({
+      url: `/api/v1/documents/${id}`,
       method: 'PUT',
       data
     })
   },
 
   delete(id: string) {
-    return request('/api/v1/documents/${id}'.replace('${id}', id), {
+    return request({
+      url: `/api/v1/documents/${id}`,
       method: 'DELETE'
     })
   },
 
   getVersions(id: string) {
-    return request<any>('/api/v1/documents/${id}/versions'.replace('${id}', id), {
+    return request<DocumentItem[]>({
+      url: `/api/v1/documents/${id}/versions`,
       method: 'GET'
     })
   },
 
   restoreVersion(id: string, versionId: string) {
-    return request('/api/v1/documents/${id}/versions/${versionId}/restore'
-      .replace('${id}', id)
-      .replace('${versionId}', versionId), {
+    return request({
+      url: `/api/v1/documents/${id}/versions/${versionId}/restore`,
       method: 'POST'
     })
   }

@@ -79,7 +79,8 @@ onMounted(async () => {
 
 const loadDoc = async () => {
   try {
-    doc.value = await documentApi.getById(docId.value)
+    const res = await documentApi.getById(docId.value)
+    doc.value = res.data
   } catch (e) {
     console.error('加载文书详情失败', e)
   }
@@ -88,7 +89,7 @@ const loadDoc = async () => {
 const loadVersions = async () => {
   try {
     const res = await documentApi.getVersions(docId.value)
-    versions.value = res.list || []
+    versions.value = res.data || []
   } catch (e) {
     console.error('加载版本失败', e)
   }
@@ -122,7 +123,7 @@ const duplicateDoc = async () => {
     uni.showToast({ title: '已创建副本' })
     setTimeout(() => {
       uni.navigateTo({
-        url: `/pages/document/detail?id=${res.id}`
+        url: `/pages/document/detail?id=${res.data.id}`
       })
     }, 1000)
   } catch (e) {

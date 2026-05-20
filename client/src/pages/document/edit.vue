@@ -87,7 +87,8 @@ onMounted(async () => {
 
 const loadDoc = async () => {
   try {
-    const doc = await documentApi.getById(docId.value)
+    const res = await documentApi.getById(docId.value)
+    const doc = res.data
     form.title = doc.title
     form.content = doc.content
     form.docType = doc.docType
@@ -135,7 +136,7 @@ const handleSave = async () => {
         docType: form.docType,
         tags: form.tags
       })
-      docId.value = res.id
+      docId.value = res.data.id
       isEdit.value = true
     }
     uni.showToast({ title: '保存成功' })
@@ -172,7 +173,7 @@ const handleSaveDraft = async () => {
         docType: form.docType,
         tags: form.tags
       })
-      docId.value = res.id
+      docId.value = res.data.id
       isEdit.value = true
     }
     uni.showToast({ title: '已保存草稿' })

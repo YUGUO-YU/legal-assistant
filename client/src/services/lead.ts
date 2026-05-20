@@ -35,41 +35,47 @@ export interface LeadListResponse {
 
 export const leadApi = {
   getList(status?: string, page = 1, pageSize = 20) {
-    return request<LeadListResponse>('/api/v1/leads', {
+    return request<LeadListResponse>({
+      url: '/api/v1/leads',
       method: 'GET',
-      params: { status, page, pageSize }
+      data: { status, page, pageSize }
     })
   },
 
   getById(id: string) {
-    return request<LeadItem>('/api/v1/leads/${id}'.replace('${id}', id), {
+    return request<LeadItem>({
+      url: `/api/v1/leads/${id}`,
       method: 'GET'
     })
   },
 
   create(data: CreateLeadRequest) {
-    return request<LeadItem>('/api/v1/leads', {
+    return request<LeadItem>({
+      url: '/api/v1/leads',
       method: 'POST',
       data
     })
   },
 
   update(id: string, data: UpdateLeadRequest) {
-    return request<LeadItem>('/api/v1/leads/${id}'.replace('${id}', id), {
+    return request<LeadItem>({
+      url: `/api/v1/leads/${id}`,
       method: 'PUT',
       data
     })
   },
 
   updateStatus(id: string, status: string) {
-    return request('/api/v1/leads/${id}/status'.replace('${id}', id), {
+    return request({
+      url: `/api/v1/leads/${id}/status`,
       method: 'PUT',
       data: { status }
     })
   },
 
   delete(id: string) {
-    return request('/api/v1/leads/${id}'.replace('${id}', id), {
+    return request({
+      url: `/api/v1/leads/${id}`,
       method: 'DELETE'
     })
   }

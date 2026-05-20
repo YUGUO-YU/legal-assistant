@@ -39,32 +39,37 @@ export interface CompanyDetailResponse {
 
 export const companyApi = {
   search(params: CompanySearchRequest) {
-    return request<CompanySearchResponse>('/api/v1/companies/search', {
+    return request<CompanySearchResponse>({
+      url: '/api/v1/companies/search',
       method: 'GET',
-      params
+      data: params
     })
   },
 
   getDetail(id: string) {
-    return request<CompanyDetailResponse>(`/api/v1/companies/${id}`, {
+    return request<CompanyDetailResponse>({
+      url: `/api/v1/companies/${id}`,
       method: 'GET'
     })
   },
 
   getShareholders(id: string) {
-    return request<CompanyDetailResponse>(`/api/v1/companies/${id}/shareholders`, {
+    return request<{ shareholders: { name: string; sharePercent: number; capital: string }[] }>({
+      url: `/api/v1/companies/${id}/shareholders`,
       method: 'GET'
     })
   },
 
   getRiskInfo(id: string) {
-    return request<CompanyDetailResponse>(`/api/v1/companies/${id}/risk`, {
+    return request<{ risks: { type: string; description: string; date: string }[] }>({
+      url: `/api/v1/companies/${id}/risk`,
       method: 'GET'
     })
   },
 
   getGraph(id: string) {
-    return request<any>(`/api/v1/companies/${id}/graph`, {
+    return request<any>({
+      url: `/api/v1/companies/${id}/graph`,
       method: 'GET'
     })
   }

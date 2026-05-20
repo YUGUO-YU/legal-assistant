@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 import { authService } from '@/services/auth'
 
 interface UserInfo {

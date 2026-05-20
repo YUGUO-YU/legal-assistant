@@ -111,7 +111,8 @@ onMounted(async () => {
 
 const loadProfile = async () => {
   try {
-    const profile = await userApi.getProfile()
+    const res = await userApi.getProfile()
+    const profile = res.data
     form.username = profile.username
     form.email = profile.email || ''
     form.phone = profile.phone || ''

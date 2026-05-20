@@ -24,20 +24,23 @@ export interface UpdateProfileRequest {
 
 export const userApi = {
   getProfile() {
-    return request<UserProfile>('/api/v1/users/profile', {
+    return request<UserProfile>({
+      url: '/api/v1/users/profile',
       method: 'GET'
     })
   },
 
   updateProfile(data: UpdateProfileRequest) {
-    return request<UserProfile>('/api/v1/users/profile', {
+    return request<UserProfile>({
+      url: '/api/v1/users/profile',
       method: 'PUT',
       data
     })
   },
 
   updateAvatar(avatar: string) {
-    return request('/api/v1/users/profile/avatar', {
+    return request({
+      url: '/api/v1/users/profile/avatar',
       method: 'PUT',
       data: { avatar }
     })
