@@ -1,0 +1,24 @@
+# Telegram 渠道配置
+
+telegram:
+  enabled: false
+  botToken: ${TELEGRAM_BOT_TOKEN}
+  dmPolicy: pairing
+  allowFrom:
+    - ${ALLOWED_TELEGRAM_USERS}
+  commands:
+    - /start
+    - /help
+    - /search
+    - /case
+    - /law
+
+# Telegram 配置说明:
+# botToken: Telegram Bot Token，从 @BotFather 获取
+# dmPolicy: 私信策略 (pairing/allow/deny)
+# allowFrom: 允许使用 bot 的用户ID列表
+# commands: 注册的命令列表
+
+# 请在环境变量中设置以下值:
+# TELEGRAM_BOT_TOKEN: Bot Token
+# ALLOWED_TELEGRAM_USERS: 允许的用户ID，逗号分隔

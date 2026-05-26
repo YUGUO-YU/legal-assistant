@@ -1,0 +1,24 @@
+# 微信渠道配置 (企业微信)
+
+wechat:
+  enabled: true
+  botType: wework
+  corpId: ${WECHAT_CORP_ID}
+  agentId: ${WECHAT_AGENT_ID}
+  secret: ${WECHAT_SECRET}
+  token: ${WECHAT_TOKEN}
+  encodingAesKey: ${WECHAT_AES_KEY}
+
+# 企业微信配置说明:
+# corpId: 企业ID，可在企业微信管理后台获取
+# agentId: 应用AgentID
+# secret: 应用Secret
+# token: 用于验证请求的Token
+# encodingAesKey: 用于消息加密的AES Key
+
+# 请在环境变量中设置以下值:
+# WECHAT_CORP_ID: 企业ID
+# WECHAT_AGENT_ID: AgentID
+# WECHAT_SECRET: Secret
+# WECHAT_TOKEN: Token
+# WECHAT_AES_KEY: AES Key

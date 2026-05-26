@@ -2,7 +2,7 @@ gateway:
   port: 8090
   auth:
     enabled: true
-    jwtSecret: ${JWT_SECRET}
+    jwtSecret: ${JWT_SECRET:-legal-assistant-secret-key-change-in-production}
 
 channels:
   webchat:
@@ -11,7 +11,10 @@ channels:
 
 agents:
   defaults:
-    model: openai/gpt-4
+    model: minimax/minimax2.7
+    modelConfig:
+      apiKey: ${MINIMAX_API_KEY}
+      baseURL: ${MINIMAX_BASE_URL:-https://api.minimax.chat/v2}
     skills:
       - china-legal-query
       - china-contract-review
