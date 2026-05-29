@@ -9,6 +9,12 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  build: {
+    outDir: resolve(__dirname, '../server/src/main/resources/static'),
+    assetsDir: 'assets',
+    minify: 'terser',
+    copyPublicDir: true
+  },
   server: {
     port: 5173,
     allowedHosts: ['.monkeycode-ai.online'],
