@@ -288,4 +288,14 @@ public class AuthServiceImpl implements AuthService {
         userMapper.insert(user);
         return user;
     }
+
+    @Override
+    public void updateUserPhone(String userId, String phone) {
+        User user = userMapper.selectById(userId);
+        if (user != null) {
+            user.setPhone(phone);
+            userMapper.updateById(user);
+            log.info("更新用户手机号：userId={}, phone={}", userId, phone);
+        }
+    }
 }

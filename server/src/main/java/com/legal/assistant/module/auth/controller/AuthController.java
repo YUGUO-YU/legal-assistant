@@ -35,6 +35,14 @@ public class AuthController {
     }
 
     /**
+     * 微信小程序一键登录（获取手机号）
+     */
+    @PostMapping("/wechat/mini/login")
+    public Result<LoginResponse> wechatMiniLogin(@Valid @RequestBody WechatMiniLoginRequest request) {
+        return Result.success(wechatService.miniLogin(request));
+    }
+
+    /**
      * H5 微信扫码登录 - 生成二维码
      */
     @GetMapping("/wechat/qr/generate")

@@ -14,5 +14,6 @@ public interface AuthService {
     void logout(String userId);
     
     User findOrCreateWechatUser(String openid, String unionid, WechatLoginRequest request);
+    void updateUserPhone(String userId, String phone);
     LoginResponse generateToken(User user);
 }

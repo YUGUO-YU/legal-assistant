@@ -25,6 +25,19 @@
       }
     },
     {
+      "path": "pages/auth/mini-login",
+      "style": {
+        "navigationBarTitleText": "微信登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/auth/phone-login",
+      "style": {
+        "navigationBarTitleText": "手机登录"
+      }
+    },
+    {
       "path": "pages/document/list",
       "style": {
         "navigationBarTitleText": "我的文书"
