@@ -43,6 +43,12 @@
       }
     },
     {
+      "path": "pages/document/generate",
+      "style": {
+        "navigationBarTitleText": "生成文书"
+      }
+    },
+    {
       "path": "pages/case/search",
       "style": {
         "navigationBarTitleText": "案例搜索"

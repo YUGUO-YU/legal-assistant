@@ -96,6 +96,13 @@
             </view>
             <text class="tool-arrow">›</text>
           </view>
+          <view class="tool-item" @click="navigateTo('/pages/document/generate')">
+            <view class="tool-content">
+              <view class="tool-icon">✨</view>
+              <text class="tool-text">生成文书</text>
+            </view>
+            <text class="tool-arrow">›</text>
+          </view>
           <view class="tool-item" @click="navigateTo('/pages/user/profile')">
             <view class="tool-content">
               <view class="tool-icon">👤</view>
