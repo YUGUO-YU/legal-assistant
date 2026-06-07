@@ -75,10 +75,6 @@ export const useAuthStore = defineStore('auth', () => {
     return res.data
   }
 
-  async function sendSms(phone: string, type: string = 'login') {
-    return authService.sendSms({ phone, type })
-  }
-
   function logout() {
     token.value = ''
     refreshToken.value = ''
