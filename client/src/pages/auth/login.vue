@@ -1,34 +1,24 @@
 <template>
-  <div class="login-container">
-    <div class="qr-modal-overlay" v-if="showQrLogin" @click="closeQrLogin">
-      <div class="qr-modal" @click.stop>
-        <div class="qr-modal-header">
-          <h3 class="modal-title">微信扫码登录</h3>
-          <button class="modal-close" @click="closeQrLogin">×</button>
-        </div>
-        <WechatQrLogin ref="qrLoginRef" />
-      </div>
-    </div>
+  <view class="login-container">
+    <view class="login-wrapper">
+      <view class="login-header">
+        <view class="logo-wrapper">
+          <view class="logo-icon">⚖️</view>
+          <text class="title">欢迎回来</text>
+          <text class="subtitle">登录法律助手</text>
+        </view>
+      </view>
 
-    <div class="login-wrapper">
-      <div class="login-header">
-        <div class="logo-wrapper">
-          <div class="logo-icon">⚖️</div>
-          <h1 class="title">欢迎回来</h1>
-          <p class="subtitle">登录法律助手</p>
-        </div>
-      </div>
-
-      <div class="login-form">
-        <h2 class="form-title">
-          <span class="title-icon">{{ loginMode === 'phone' ? '📱' : '📧' }}</span>
+      <view class="login-form">
+        <view class="form-title">
+          <text class="title-icon">{{ loginMode === 'phone' ? '📱' : '📧' }}</text>
           {{ loginMode === 'phone' ? '手机号登录' : '邮箱验证码登录' }}
-        </h2>
+        </view>
         
         <template v-if="loginMode === 'phone'">
-          <div class="form-item">
-            <div class="input-wrapper">
-              <div class="input-icon">📱</div>
+          <view class="form-item">
+            <view class="input-wrapper">
+              <text class="input-icon">📱</text>
               <input
                 v-model="phone"
                 type="tel"
@@ -36,12 +26,12 @@
                 placeholder="请输入手机号"
                 class="input"
               />
-            </div>
-          </div>
+            </view>
+          </view>
 
-          <div class="form-item">
-            <div class="input-wrapper">
-              <div class="input-icon">🔐</div>
+          <view class="form-item">
+            <view class="input-wrapper">
+              <text class="input-icon">🔐</text>
               <input
                 v-model="code"
                 type="tel"
@@ -53,35 +43,33 @@
                 class="send-btn" 
                 :class="{ disabled: countdown > 0 }" 
                 @click="sendCode"
-                :disabled="countdown > 0"
               >
                 {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
               </button>
-            </div>
-          </div>
+            </view>
+          </view>
 
           <button class="login-btn" :disabled="loading" @click="handleLogin">
-            <span class="btn-text">{{ loading ? '登录中...' : '立即登录' }}</span>
-            <span class="btn-icon">→</span>
+            <text class="btn-text">{{ loading ? '登录中...' : '立即登录' }}</text>
           </button>
         </template>
         
         <template v-else>
-          <div class="form-item">
-            <div class="input-wrapper">
-              <div class="input-icon">📧</div>
+          <view class="form-item">
+            <view class="input-wrapper">
+              <text class="input-icon">📧</text>
               <input
                 v-model="email"
                 type="email"
                 placeholder="请输入邮箱地址"
                 class="input"
               />
-            </div>
-          </div>
+            </view>
+          </view>
 
-          <div class="form-item">
-            <div class="input-wrapper">
-              <div class="input-icon">🔐</div>
+          <view class="form-item">
+            <view class="input-wrapper">
+              <text class="input-icon">🔐</text>
               <input
                 v-model="emailCode"
                 type="tel"
@@ -93,59 +81,56 @@
                 class="send-btn" 
                 :class="{ disabled: emailCountdown > 0 }" 
                 @click="sendEmailCode"
-                :disabled="emailCountdown > 0"
               >
                 {{ emailCountdown > 0 ? `${emailCountdown}s` : '发送验证码' }}
               </button>
-            </div>
-          </div>
+            </view>
+          </view>
 
           <button class="login-btn" :disabled="emailLoading" @click="handleEmailLogin">
-            <span class="btn-text">{{ emailLoading ? '登录中...' : '立即登录' }}</span>
-            <span class="btn-icon">→</span>
+            <text class="btn-text">{{ emailLoading ? '登录中...' : '立即登录' }}</text>
           </button>
         </template>
 
-        <div class="switch-mode">
-          <span class="switch-text" @click="switchMode">
+        <view class="switch-mode">
+          <text class="switch-text" @click="switchMode">
             {{ loginMode === 'phone' ? '使用邮箱验证码登录' : '使用手机号登录' }}
-          </span>
-          <span class="switch-text divider">|</span>
-          <span class="switch-text" @click="showQrLogin = true">扫码登录</span>
-        </div>
+          </text>
+          <text class="switch-text divider">|</text>
+          <text class="switch-text" @click="goToMiniLogin">小程序登录</text>
+        </view>
         
-        <div class="divider">
-          <div class="divider-line"></div>
-          <span class="divider-text">其他登录方式</span>
-          <div class="divider-line"></div>
-        </div>
+        <view class="divider">
+          <view class="divider-line"></view>
+          <text class="divider-text">其他登录方式</text>
+          <view class="divider-line"></view>
+        </view>
         
-        <div class="other-login">
-          <div class="other-item" @click="showQrLogin = true">
-            <div class="other-icon wx">💚</div>
-            <span class="other-text">微信扫码</span>
-          </div>
-          <div class="other-item" @click="switchMode">
-            <div class="other-icon email">📧</div>
-            <span class="other-text">邮箱验证码</span>
-          </div>
-        </div>
-      </div>
+        <view class="other-login">
+          <view class="other-item" @click="goToMiniLogin">
+            <view class="other-icon wx">💚</view>
+            <text class="other-text">微信小程序</text>
+          </view>
+          <view class="other-item" @click="switchMode">
+            <view class="other-icon email">📧</view>
+            <text class="other-text">邮箱验证码</text>
+          </view>
+        </view>
+      </view>
 
-      <div class="login-footer">
-        <span>登录即表示同意</span>
-        <a href="#" class="link">《用户协议》</a>
-        <span>和</span>
-        <a href="#" class="link">《隐私政策》</a>
-      </div>
-    </div>
-  </div>
+      <view class="login-footer">
+        <text>登录即表示同意</text>
+        <text class="link">《用户协议》</text>
+        <text>和</text>
+        <text class="link">《隐私政策》</text>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import WechatQrLogin from '@/components/WechatQrLogin.vue'
 
 const authStore = useAuthStore()
 
@@ -158,8 +143,6 @@ const emailCode = ref('')
 const emailLoading = ref(false)
 const emailCountdown = ref(0)
 const loginMode = ref<'phone' | 'email'>('phone')
-const showQrLogin = ref(false)
-const qrLoginRef = ref()
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 let emailCountdownTimer: ReturnType<typeof setInterval> | null = null
@@ -281,8 +264,8 @@ function switchMode() {
   loginMode.value = loginMode.value === 'phone' ? 'email' : 'phone'
 }
 
-function closeQrLogin() {
-  showQrLogin.value = false
+function goToMiniLogin() {
+  uni.navigateTo({ url: '/pages/auth/mini-login' })
 }
 </script>
 
