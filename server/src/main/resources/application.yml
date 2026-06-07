@@ -38,8 +38,8 @@ jwt:
 
 wechat:
   miniapp:
-    appid: ${WECHAT_MINIAPP_APPID:}
-    secret: ${WECHAT_MINIAPP_SECRET:}
+    appid: ${WECHAT_MINIAPP_APPID:wx5f819bd85fd7c4d8}
+    secret: ${WECHAT_MINIAPP_SECRET:61a1ab391188e9b928d34735d3421dbb}
   oa:
     appid: ${WECHAT_OA_APPID:}
     secret: ${WECHAT_OA_SECRET:}

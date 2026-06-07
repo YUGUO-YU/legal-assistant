@@ -28,7 +28,7 @@
   },
   "quickapp": {},
   "mp-weixin": {
-    "appid": "your-wechat-appid",
+    "appid": "wx5f819bd85fd7c4d8",
     "setting": {
       "urlCheck": true,
       "es6": true,
