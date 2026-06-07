@@ -49,6 +49,18 @@ export const useAuthStore = defineStore('auth', () => {
     return res.data
   }
 
+  async function wechatLogin(params: { code: string; encryptedData?: string; iv?: string }) {
+    const res = await authService.wechatLogin(params)
+    setToken(res.data.token)
+    setRefreshToken(res.data.refreshToken)
+    setUserInfo(res.data.user)
+    return res.data
+  }
+
+  async function sendSms(phone: string, type: string = 'login') {
+    return authService.sendSms({ phone, type })
+  }
+
   async function register(params: {
     phone: string
     email: string
@@ -99,6 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn,
     loginByPhone,
     loginByEmail,
+    wechatLogin,
     register,
     sendSms,
     logout,

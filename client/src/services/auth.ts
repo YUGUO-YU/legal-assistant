@@ -37,6 +37,15 @@ interface SendSmsParams {
   type?: string
 }
 
+interface WechatLoginParams {
+  code: string
+  encryptedData?: string
+  iv?: string
+  rawData?: string
+  signature?: string
+  userinfo?: string
+}
+
 export const authService = {
   phoneLogin(data: PhoneLoginParams) {
     return api.post<LoginResponse>('/api/v1/auth/phone/login', data)
@@ -44,6 +53,10 @@ export const authService = {
 
   emailLogin(data: EmailLoginParams) {
     return api.post<LoginResponse>('/api/v1/auth/email/login', data)
+  },
+
+  wechatLogin(data: WechatLoginParams) {
+    return api.post<LoginResponse>('/api/v1/auth/wechat/login', data)
   },
 
   register(data: RegisterParams) {

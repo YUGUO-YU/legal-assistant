@@ -11,14 +11,18 @@ CREATE TABLE IF NOT EXISTS `user` (
     `email` VARCHAR(255) UNIQUE COMMENT '邮箱',
     `password_hash` VARCHAR(255) NOT NULL COMMENT '密码哈希',
     `nickname` VARCHAR(100) COMMENT '昵称',
-    `avatar_url` VARCHAR(500) COMMENT '头像URL',
+    `avatar_url` VARCHAR(500) COMMENT '头像 URL',
+    `wechat_openid` VARCHAR(64) UNIQUE COMMENT '微信 OpenID',
+    `wechat_unionid` VARCHAR(64) UNIQUE COMMENT '微信 UnionID',
     `role` ENUM('admin', 'lawyer', 'assistant', 'guest') DEFAULT 'lawyer' COMMENT '角色',
-    `status` TINYINT DEFAULT 1 COMMENT '状态: 1-正常, 0-禁用',
+    `status` TINYINT DEFAULT 1 COMMENT '状态：1-正常，0-禁用',
     `deleted` TINYINT DEFAULT 0 COMMENT '删除标记',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX `idx_phone` (`phone`),
-    INDEX `idx_email` (`email`)
+    INDEX `idx_email` (`email`),
+    INDEX `idx_wechat_openid` (`wechat_openid`),
+    INDEX `idx_wechat_unionid` (`wechat_unionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 团队表

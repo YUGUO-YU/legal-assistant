@@ -75,8 +75,19 @@ const quickQuestions = [
 ]
 
 onMounted(() => {
+  // 获取页面参数
   const pages = getCurrentPages()
   const currentPage = pages[pages.length - 1] as any
+  const query = currentPage.options?.query || ''
+  
+  // 如果有传入query参数，自动发送
+  if (query) {
+    inputText.value = decodeURIComponent(query)
+    setTimeout(() => {
+      sendMessage()
+    }, 300)
+  }
+  
   const context = currentPage.options?.context || ''
   const id = currentPage.options?.id || ''
 
@@ -144,11 +155,13 @@ const scrollToBottom = async () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/style/variables.scss';
+
 .ai-chat {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #f5f5f5;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
 }
 
 .chat-scroll {
@@ -157,13 +170,25 @@ const scrollToBottom = async () => {
 }
 
 .messages {
-  padding: 20rpx;
-  padding-bottom: 120rpx;
+  padding: 32rpx;
+  padding-bottom: 160rpx;
 }
 
 .message {
   display: flex;
-  margin-bottom: 32rpx;
+  margin-bottom: 40rpx;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .message.user {
@@ -171,47 +196,72 @@ const scrollToBottom = async () => {
 }
 
 .avatar {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 36rpx;
-  background: #1890ff;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  background: $primary-gradient;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
+  font-size: 28rpx;
+  font-weight: 600;
   flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.3);
 }
 
 .message.assistant .avatar {
-  background: #52c41a;
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  box-shadow: 0 4rpx 12rpx rgba(82, 196, 26, 0.3);
 }
 
 .content {
   max-width: 70%;
-  margin: 0 20rpx;
+  margin: 0 24rpx;
 }
 
 .text {
-  padding: 20rpx 24rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  line-height: 1.6;
+  padding: 28rpx 32rpx;
+  background: $background-white;
+  border-radius: $radius-lg $radius-lg $radius-lg 4rpx;
+  font-size: 30rpx;
+  line-height: 1.8;
+  color: $text-primary;
+  box-shadow: $shadow-md;
   white-space: pre-wrap;
 }
 
 .message.user .text {
-  background: #1890ff;
+  background: $primary-gradient;
   color: #fff;
+  border-radius: $radius-lg $radius-lg 4rpx $radius-lg;
+  box-shadow: 0 4rpx 16rpx rgba(24, 144, 255, 0.25);
 }
 
 .loading {
-  padding: 20rpx 24rpx;
-  background: #fff;
-  border-radius: 12rpx;
+  padding: 28rpx 32rpx;
+  background: $background-white;
+  border-radius: $radius-lg;
   font-size: 28rpx;
-  color: #999;
+  color: $text-secondary;
+  box-shadow: $shadow-sm;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+
+  &::before {
+    content: '';
+    width: 24rpx;
+    height: 24rpx;
+    border: 3rpx solid $border-color;
+    border-top-color: $primary-color;
+    border-radius: $radius-round;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .input-area {
@@ -221,61 +271,94 @@ const scrollToBottom = async () => {
   right: 0;
   display: flex;
   gap: 20rpx;
-  padding: 20rpx;
-  background: #fff;
-  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+  padding: 24rpx 32rpx;
+  background: $background-white;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
+  border-radius: 48rpx 48rpx 0 0;
+  backdrop-filter: blur(10rpx);
 }
 
 .input {
   flex: 1;
-  height: 80rpx;
-  padding: 0 24rpx;
-  background: #f5f5f5;
-  border-radius: 40rpx;
-  font-size: 28rpx;
+  height: 88rpx;
+  padding: 0 32rpx;
+  background: $background-light;
+  border-radius: $radius-round;
+  font-size: 30rpx;
+  color: $text-primary;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:focus {
+    background: $background-white;
+    border-color: $primary-color;
+  }
 }
 
 .send-btn {
-  width: 140rpx;
-  height: 80rpx;
-  line-height: 80rpx;
-  background: #1890ff;
+  width: 160rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: $primary-gradient;
   color: #fff;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-}
+  border-radius: $radius-round;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(24, 144, 255, 0.3);
+  transition: all $transition-fast;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-.send-btn[disabled] {
-  background: #ccc;
+  &:active:not([disabled]) {
+    transform: scale(0.95);
+  }
+
+  &[disabled] {
+    background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+    box-shadow: none;
+  }
 }
 
 .quick-questions {
   position: fixed;
-  bottom: 120rpx;
-  left: 20rpx;
-  right: 20rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  padding: 24rpx;
+  bottom: 160rpx;
+  left: 32rpx;
+  right: 32rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: $radius-lg;
+  padding: 32rpx;
+  box-shadow: $shadow-lg;
+  backdrop-filter: blur(10rpx);
 }
 
 .quick-title {
   font-size: 26rpx;
-  color: #999;
-  margin-bottom: 16rpx;
+  color: $text-secondary;
+  margin-bottom: 20rpx;
+  font-weight: 500;
 }
 
 .quick-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
 .quick-item {
-  padding: 12rpx 24rpx;
-  background: #e6f7ff;
-  border-radius: 8rpx;
+  padding: 16rpx 28rpx;
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border-radius: $radius-round;
   font-size: 26rpx;
-  color: #1890ff;
+  color: $primary-dark;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(24, 144, 255, 0.15);
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.25);
+  }
 }
 </style>

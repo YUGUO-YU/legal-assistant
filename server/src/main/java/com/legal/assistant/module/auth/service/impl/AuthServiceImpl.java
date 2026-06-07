@@ -150,9 +150,75 @@ public class AuthServiceImpl implements AuthService {
 
         redisTemplate.delete(redisKey);
     }
+    
+    private void validateEmailCode(String email, String code) {
+        String redisKey = EMAIL_CODE_PREFIX + email;
+        String cachedCode = (String) redisTemplate.opsForValue().get(redisKey);
+        
+        if (cachedCode == null) {
+            throw new BusinessException(1000, "验证码已过期或不存在");
+        }
+        
+        if (!cachedCode.equals(code)) {
+            throw new BusinessException(1000, "验证码错误");
+        }
+        
+        redisTemplate.delete(redisKey);
+    }
+    
+    public void sendEmailCode(String email) {
+        String code = generateSmsCode();
+        
+        String redisKey = EMAIL_CODE_PREFIX + email;
+        redisTemplate.opsForValue().set(redisKey, code, SMS_CODE_EXPIRE, TimeUnit.MINUTES);
+        
+        log.info("发送邮件验证码：email={}, code={}", email, code);
+        
+        // TODO: 实际调用邮件服务发送邮件
+    }
+    
+    private User createByEmail(String email) {
+        User user = new User();
+        user.setEmail(email);
+        // 提取邮箱用户名作为昵称
+        String nickname = email.substring(0, email.indexOf("@"));
+        user.setNickname(nickname);
+        user.setRole("lawyer");
+        user.setStatus(1);
+        userMapper.insert(user);
+        log.info("创建邮箱用户，userId={}, email={}", user.getId(), email);
+        return user;
+    }
 
     private String generateSmsCode() {
         return String.format("%06d", new Random().nextInt(999999));
+    }
+    
+    private static final String EMAIL_CODE_PREFIX = "email:code:";
+    
+    @Override
+    public void sendEmailCode(SendSmsRequest request) {
+        // 这个方法已废弃，使用 sendEmailCode 直接处理
+    }
+    
+    @Override
+    public LoginResponse emailCodeLogin(EmailCodeLoginRequest request) {
+        String email = request.getEmail();
+        String code = request.getCode();
+        
+        validateEmailCode(email, code);
+        
+        // 查找用户
+        User user = userMapper.selectOne(
+            new LambdaQueryWrapper<User>().eq(User::getEmail, email)
+        );
+        
+        if (user == null) {
+            // 自动创建用户
+            user = createByEmail(email);
+        }
+        
+        return buildLoginResponse(user);
     }
 
     private LoginResponse buildLoginResponse(User user) {
@@ -174,5 +240,52 @@ public class AuthServiceImpl implements AuthService {
             .expiresIn(604800L)
             .user(userInfo)
             .build();
+    }
+
+    @Override
+    public User findOrCreateWechatUser(String openid, String unionid, WechatLoginRequest request) {
+        String redisKey = "wechat:openid:" + openid;
+        String userId = (String) redisTemplate.opsForValue().get(redisKey);
+
+        if (userId != null) {
+            User existingUser = userMapper.selectById(userId);
+            if (existingUser != null) {
+                return existingUser;
+            }
+        }
+
+        User user = userMapper.selectOne(
+            new LambdaQueryWrapper<User>().eq(User::getWechatOpenid, openid)
+        );
+
+        if (user == null && unionid != null) {
+            user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getWechatUnionid, unionid)
+            );
+        }
+
+        if (user == null) {
+            user = createWechatUser(openid, unionid);
+        }
+
+        redisTemplate.opsForValue().set(redisKey, user.getId(), 7, TimeUnit.DAYS);
+
+        return user;
+    }
+
+    @Override
+    public LoginResponse generateToken(User user) {
+        return buildLoginResponse(user);
+    }
+
+    private User createWechatUser(String openid, String unionid) {
+        User user = new User();
+        user.setWechatOpenid(openid);
+        user.setWechatUnionid(unionid);
+        user.setNickname("微信用户" + openid.substring(openid.length() - 6));
+        user.setRole("lawyer");
+        user.setStatus(1);
+        userMapper.insert(user);
+        return user;
     }
 }

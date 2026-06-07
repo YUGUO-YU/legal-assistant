@@ -1,0 +1,87 @@
+// 法律助手 - 全局样式变量
+
+// 主题色
+$primary-color: #1890ff;
+$primary-light: #40a9ff;
+$primary-dark: #096dd9;
+$primary-gradient: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+
+// 辅助色
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$info-color: #13c2c2;
+
+// 中性色
+$text-primary: #1f2937;
+$text-regular: #4b5563;
+$text-secondary: #6b7280;
+$text-placeholder: #9ca3af;
+$border-color: #e5e7eb;
+$background-light: #f9fafb;
+$background-white: #ffffff;
+
+// 背景渐变
+$bg-gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$bg-gradient-blue: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+$bg-gradient-green: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+$bg-gradient-warm: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+
+// 阴影
+$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+$shadow-primary: 0 4rpx 20rpx rgba(24, 144, 255, 0.15);
+
+// 圆角
+$radius-sm: 8rpx;
+$radius-md: 16rpx;
+$radius-lg: 24rpx;
+$radius-xl: 32rpx;
+$radius-round: 9999rpx;
+
+// 间距
+$spacing-xs: 8rpx;
+$spacing-sm: 16rpx;
+$spacing-md: 24rpx;
+$spacing-lg: 32rpx;
+$spacing-xl: 48rpx;
+
+// 字体大小
+$font-xs: 24rpx;
+$font-sm: 26rpx;
+$font-md: 28rpx;
+$font-lg: 32rpx;
+$font-xl: 36rpx;
+$font-xxl: 48rpx;
+
+// 动画过渡
+$transition-fast: 0.15s ease;
+$transition-base: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// 通用 mixins
+@mixin card {
+  background: $background-white;
+  border-radius: $radius-md;
+  box-shadow: $shadow-md;
+}
+
+@mixin gradient-text {
+  background: $primary-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

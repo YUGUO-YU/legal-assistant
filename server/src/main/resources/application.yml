@@ -7,9 +7,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/legal_assistant?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://localhost:3306/legal_assistant?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: ${DB_PASSWORD:password}
+    password: main0126
 
   data:
     redis:
@@ -35,6 +35,20 @@ jwt:
   secret: ${JWT_SECRET:your-super-secret-key-change-in-production}
   expiration: 604800000
   refresh-expiration: 2592000000
+
+wechat:
+  miniapp:
+    appid: ${WECHAT_MINIAPP_APPID:}
+    secret: ${WECHAT_MINIAPP_SECRET:}
+  oa:
+    appid: ${WECHAT_OA_APPID:}
+    secret: ${WECHAT_OA_SECRET:}
+    token: ${WECHAT_OA_TOKEN:}
+    aes-key: ${WECHAT_OA_AESKEY:}
+  open:
+    appid: ${WECHAT_OPEN_APPID:}
+    secret: ${WECHAT_OPEN_SECRET:}
+    redirect-uri: ${WECHAT_OPEN_REDIRECT_URI:http://localhost:5173/wechat/callback}
 
 sms:
   secret-id: ${SMS_SECRET_ID:}

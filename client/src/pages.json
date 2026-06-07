@@ -19,6 +19,12 @@
       }
     },
     {
+      "path": "pages/auth/email-login",
+      "style": {
+        "navigationBarTitleText": "邮箱登录"
+      }
+    },
+    {
       "path": "pages/document/list",
       "style": {
         "navigationBarTitleText": "我的文书"

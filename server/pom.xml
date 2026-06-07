@@ -104,19 +104,18 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Test -->
+        <!-- poi-tl Word 模板引擎 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <groupId>com.deepoove</groupId>
+            <artifactId>poi-tl</artifactId>
+            <version>1.12.2</version>
         </dependency>
 
-        <!-- Spring Boot DevTools -->
+        <!-- Apache Commons IO -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.1</version>
         </dependency>
     </dependencies>
 
@@ -144,6 +143,7 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <!-- 前端构建已手动执行，注释掉自动构建插件
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
@@ -182,6 +182,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
     </build>
 </project>

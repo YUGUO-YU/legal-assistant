@@ -1,7 +1,7 @@
 {
   "name": "法律助手",
   "appid": "__UNI__LEGALASSISTANT",
-  "description": "律师法律工作效率工具小程序",
+  "description": "律师法律工作效率工具",
   "versionName": "1.0.0",
   "versionCode": "100",
   "transformPx": false,
@@ -30,25 +30,46 @@
   "mp-weixin": {
     "appid": "your-wechat-appid",
     "setting": {
-      "urlCheck": false,
+      "urlCheck": true,
       "es6": true,
-      "minified": true
+      "minified": true,
+      "postcss": true
     },
-    "usingComponents": true
+    "usingComponents": true,
+    "permission": {
+      "scope.userProfile": {
+        "desc": "用于获取用户昵称和头像"
+      }
+    },
+    "requiredPrivateInfos": []
   },
   "h5": {
+    "title": "法律助手 - 专业法律工作效率工具",
     "router": {
       "mode": "hash",
       "base": "/"
     },
     "devServer": {
       "port": 5173,
+      "https": false,
       "proxy": {
         "/api": {
           "target": "http://localhost:8080",
-          "changeOrigin": true
+          "changeOrigin": true,
+          "secure": false,
+          "pathRewrite": {
+            "^/api": "/api"
+          }
         }
       }
+    },
+    "optimization": {
+      "treeShaking": true,
+      "prefetch": true
+    },
+    "keepalive": true,
+    "uniStatistics": {
+      "enable": false
     }
   }
 }

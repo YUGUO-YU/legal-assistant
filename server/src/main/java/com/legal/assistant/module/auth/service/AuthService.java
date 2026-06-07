@@ -1,12 +1,18 @@
 package com.legal.assistant.module.auth.service;
 
 import com.legal.assistant.module.auth.dto.*;
+import com.legal.assistant.module.auth.entity.User;
 
 public interface AuthService {
     LoginResponse phoneLogin(PhoneLoginRequest request);
     LoginResponse emailLogin(EmailLoginRequest request);
+    LoginResponse emailCodeLogin(EmailCodeLoginRequest request);
     LoginResponse register(EmailRegisterRequest request);
     void sendSmsCode(SendSmsRequest request);
+    void sendEmailCode(SendSmsRequest request);
     LoginResponse refreshToken(String refreshToken);
     void logout(String userId);
+    
+    User findOrCreateWechatUser(String openid, String unionid, WechatLoginRequest request);
+    LoginResponse generateToken(User user);
 }

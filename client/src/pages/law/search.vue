@@ -41,9 +41,14 @@
         </view>
       </view>
 
-      <view v-if="loading" class="loading">加载中...</view>
+      <view v-if="loading" class="loading">
+        <text class="loading-text">加载中...</text>
+      </view>
       <view v-if="noMore && laws.length > 0" class="no-more">没有更多了</view>
-      <view v-if="!loading && laws.length === 0" class="empty">暂无数据</view>
+      <view v-if="!loading && laws.length === 0" class="empty">
+        <text class="empty-icon">📚</text>
+        <text class="empty-text">暂无数据</text>
+      </view>
     </scroll-view>
   </view>
 </template>
@@ -63,6 +68,15 @@ const pageSize = ref(20)
 const lawTypes = ['全部', '法律', '行政法规', '司法解释', '部门规章', '地方性法规']
 
 onMounted(() => {
+  // 获取页面参数
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1] as any
+  const urlKeyword = currentPage.options?.keyword || ''
+  
+  if (urlKeyword) {
+    keyword.value = decodeURIComponent(urlKeyword)
+  }
+  
   loadLaws()
 })
 
@@ -119,42 +133,70 @@ const goToDetail = (id: string) => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/style/variables.scss';
+
 .law-search {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
 }
 
 .search-bar {
   display: flex;
-  padding: 20rpx;
-  background: #fff;
+  padding: 24rpx 32rpx;
+  background: $background-white;
   gap: 20rpx;
+  box-shadow: $shadow-sm;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .search-input {
   flex: 1;
-  height: 72rpx;
-  padding: 0 24rpx;
-  background: #f5f5f5;
-  border-radius: 36rpx;
+  height: 88rpx;
+  padding: 0 32rpx;
+  background: $background-light;
+  border-radius: $radius-round;
   font-size: 28rpx;
+  color: $text-primary;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:focus {
+    background: $background-white;
+    border-color: $primary-color;
+  }
+
+  &::placeholder {
+    color: $text-placeholder;
+  }
 }
 
 .search-btn {
-  width: 140rpx;
-  height: 72rpx;
-  line-height: 72rpx;
-  background: #1890ff;
+  width: 150rpx;
+  height: 88rpx;
+  background: $primary-gradient;
   color: #fff;
-  border-radius: 36rpx;
-  font-size: 28rpx;
+  border-radius: $radius-round;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(24, 144, 255, 0.3);
+  transition: all $transition-fast;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .filter-bar {
   display: flex;
-  padding: 20rpx;
-  background: #fff;
-  margin-bottom: 20rpx;
+  padding: 24rpx 32rpx;
+  background: $background-white;
+  margin-bottom: 0;
   gap: 20rpx;
 }
 
@@ -163,79 +205,137 @@ const goToDetail = (id: string) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 64rpx;
-  background: #f5f5f5;
-  border-radius: 8rpx;
-  font-size: 26rpx;
-  color: #666;
+  height: 72rpx;
+  background: $background-light;
+  border-radius: $radius-round;
+  font-size: 28rpx;
+  color: $text-regular;
+  font-weight: 500;
+  transition: all $transition-fast;
+
+  &:active {
+    background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+    color: $primary-color;
+  }
 }
 
 .arrow {
   margin-left: 8rpx;
-  font-size: 20rpx;
+  font-size: 24rpx;
+  color: $text-placeholder;
 }
 
 .law-list {
-  height: calc(100vh - 300rpx);
-  padding: 0 20rpx;
+  height: calc(100vh - 320rpx);
+  padding: 0 32rpx;
 }
 
 .law-item {
-  background: #fff;
-  border-radius: 12rpx;
-  padding: 24rpx;
-  margin-bottom: 20rpx;
+  background: $background-white;
+  border-radius: $radius-lg;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: $shadow-md;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: translateY(-4rpx);
+    box-shadow: $shadow-lg;
+  }
 }
 
 .law-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 16rpx;
 }
 
 .law-type {
-  background: #fff7e6;
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
   color: #fa8c16;
-  padding: 4rpx 16rpx;
-  border-radius: 4rpx;
-  font-size: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-round;
+  font-size: 24rpx;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(250, 140, 22, 0.15);
 }
 
 .law-status {
-  padding: 4rpx 16rpx;
-  border-radius: 4rpx;
-  font-size: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-round;
+  font-size: 24rpx;
+  font-weight: 500;
 }
 
 .law-status.effective {
-  background: #f6ffed;
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
   color: #52c41a;
 }
 
 .law-status.expired {
-  background: #fff1f0;
+  background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
   color: #ff4d4f;
 }
 
 .law-title {
-  font-size: 30rpx;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 16rpx;
-  line-height: 1.4;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: $text-primary;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .law-info {
   display: flex;
   justify-content: space-between;
-  font-size: 24rpx;
-  color: #999;
+  font-size: 26rpx;
+  color: $text-secondary;
+  padding-top: 20rpx;
+  border-top: 1rpx solid $border-color;
+}
+
+.law-number {
+  font-weight: 500;
 }
 
 .loading, .no-more, .empty {
-  text-align: center;
-  padding: 40rpx;
-  color: #999;
-  font-size: 26rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx;
+  color: $text-secondary;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  
+  &::before {
+    content: '';
+    width: 32rpx;
+    height: 32rpx;
+    border: 4rpx solid $border-color;
+    border-top-color: $primary-color;
+    border-radius: 50%;
+    margin-right: 16rpx;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
