@@ -78,22 +78,32 @@ public class DocumentServiceImpl implements DocumentService {
         // 1. 查询模板
         DocumentTemplate template = getTemplateById(request.getTemplateId());
         
-        // 2. 准备模板数据
+        // 2. 拼接完整模板路径
+        String templateFilePath = templateDir + template.getFilePath();
+        log.info("模板文件路径：{}", templateFilePath);
+        
+        // 3. 检查模板文件是否存在
+        Path templatePath = Paths.get(templateFilePath);
+        if (!Files.exists(templatePath)) {
+            throw new BusinessException(1002, "模板文件不存在：" + templateFilePath);
+        }
+        
+        // 4. 准备模板数据
         Map<String, Object> templateData = prepareTemplateData(request.getData());
         
-        // 3. 生成文件名
+        // 5. 生成文件名
         String fileName = generateFileName(template.getName());
         String outputPath = outputDir + "/" + fileName;
         
-        // 4. 确保输出目录存在
+        // 6. 确保输出目录存在
         Path outputDirPath = Paths.get(outputDir);
         if (!Files.exists(outputDirPath)) {
             Files.createDirectories(outputDirPath);
         }
         
-        // 5. 使用 poi-tl 渲染模板
+        // 7. 使用 poi-tl 渲染模板
         try {
-            XWPFTemplate.compile(template.getFilePath())
+            XWPFTemplate.compile(templateFilePath)
                 .render(templateData)
                 .writeToFile(outputPath);
             
@@ -103,10 +113,10 @@ public class DocumentServiceImpl implements DocumentService {
             throw new BusinessException(1004, "文档生成失败：" + e.getMessage());
         }
         
-        // 6. 保存历史记录
+        // 8. 保存历史记录
         saveHistory(userId, template.getId(), fileName, outputPath, request.getData());
         
-        // 7. 返回文件路径
+        // 9. 返回文件路径
         return outputPath;
     }
     
