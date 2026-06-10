@@ -56,12 +56,16 @@ sms:
   app-id: ${SMS_APP_ID:}
   template-login: ${SMS_TEMPLATE_LOGIN:your-template-id}
 
+spring:
+  mail:
+    enabled: true
+    host: smtp.qq.com
+    port: 587
+    username: hongyuyx@foxmail.com
+    password: omkziezavdfqdhic
+
 mail:
   enabled: true
-  host: smtp.qq.com
-  port: 587
-  username: hongyuyx@foxmail.com
-  password: omkziezavdfqdhic
   from: noreply@legal-assistant.com
 
 cos:

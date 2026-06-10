@@ -8,10 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "mail")
 public class MailConfig {
-    private boolean enabled = false;
-    private String host;
-    private int port = 587;
-    private String username;
-    private String password;
-    private String from;
+    private boolean enabled = true;
+    private String from = "noreply@legal-assistant.com";
 }
