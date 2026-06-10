@@ -107,6 +107,12 @@ const quickQuestions = [
 ]
 
 onMounted(() => {
+  const token = uni.getStorageSync('token')
+  if (!token) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
+  }
+
   const pages = getCurrentPages()
   const currentPage = pages[pages.length - 1] as any
   const query = currentPage.options?.query || ''
@@ -158,7 +164,6 @@ const sendMessage = async () => {
   messages.value.push({
     role: 'assistant',
     content: '',
-    displayedContent: '',
     isLoading: true,
     sources: []
   })
@@ -242,6 +247,13 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
         url: baseUrl + '/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
       })
     ])
+
+    if (aiRes.statusCode === 401) {
+      uni.removeStorageSync('token')
+      uni.removeStorageSync('userInfo')
+      uni.navigateTo({ url: '/pages/auth/login' })
+      return { content: '请先登录', sources: [] }
+    }
 
     let content = '抱歉，AI 服务暂时不可用，请稍后再试。'
     const sources: Source[] = []
@@ -352,10 +364,11 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
   background: $background-white;
   border-radius: $radius-lg $radius-lg $radius-lg 4rpx;
   font-size: 30rpx;
-  line-height: 1.8;
+  line-height: 1.6;
   color: $text-primary;
   box-shadow: $shadow-md;
   white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .message.user .text {
@@ -579,7 +592,7 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
 
 :deep(.formatted-content) {
   font-size: 30rpx;
-  line-height: 1.8;
+  line-height: 1.6;
   color: $text-primary;
 
   .h1 {
