@@ -17,8 +17,18 @@
             {{ msg.role === 'user' ? '我' : 'AI' }}
           </view>
           <view class="content">
-            <view class="text" v-if="msg.content">{{ msg.content }}</view>
-            <view class="loading" v-else>思考中...</view>
+            <view class="text" v-if="msg.displayedContent !== undefined">
+              <rich-text :nodes="formatContent(msg.displayedContent)"></rich-text>
+              <view class="typing-cursor" v-if="msg.isTyping"></view>
+            </view>
+            <view class="loading" v-else-if="msg.isLoading">
+              <view class="loading-dots">
+                <text class="dot">●</text>
+                <text class="dot">●</text>
+                <text class="dot">●</text>
+              </view>
+              <text class="loading-text">AI 思考中...</text>
+            </view>
             <view class="sources" v-if="msg.sources && msg.sources.length > 0">
               <view class="sources-title">📚 参考资料：</view>
               <view
@@ -44,7 +54,8 @@
         :disabled="sending"
       />
       <button class="send-btn" @click="sendMessage" :disabled="sending || !inputText">
-        {{ sending ? '...' : '发送' }}
+        <text v-if="sending" class="btn-loading">● ●</text>
+        <text v-else>发送</text>
       </button>
     </view>
 
@@ -71,6 +82,207 @@ interface Source {
   title: string
   type: 'case' | 'law' | 'company'
   id?: string
+}
+
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+  displayedContent?: string
+  isTyping?: boolean
+  isLoading?: boolean
+  sources?: Source[]
+}
+
+const messages = ref<Message[]>([])
+const inputText = ref('')
+const sending = ref(false)
+const scrollTop = ref(0)
+const scrollIntoView = ref('')
+
+const quickQuestions = [
+  '劳动纠纷怎么处理？',
+  '民间借贷利息怎么计算？',
+  '房屋租赁合同要注意什么？',
+  '交通事故责任如何划分？'
+]
+
+onMounted(() => {
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1] as any
+  const query = currentPage.options?.query || ''
+
+  if (query) {
+    inputText.value = decodeURIComponent(query)
+    setTimeout(() => {
+      sendMessage()
+    }, 300)
+  }
+
+  const context = currentPage.options?.context || ''
+
+  if (context === 'case') {
+    messages.value.push({
+      role: 'assistant',
+      content: '您好，我已加载该案例信息。请问您想了解案例的哪些方面？比如案件分析、判决预测、法律建议等。',
+      displayedContent: '您好，我已加载该案例信息。请问您想了解案例的哪些方面？比如案件分析、判决预测、法律建议等。'
+    })
+  } else if (context === 'company') {
+    messages.value.push({
+      role: 'assistant',
+      content: '您好，我已加载该企业信息。请问您想了解企业的哪些方面？比如企业风险分析，合作建议、法律尽职调查等。',
+      displayedContent: '您好，我已加载该企业信息。请问您想了解企业的哪些方面？比如企业风险分析，合作建议、法律尽职调查等。'
+    })
+  }
+})
+
+const askQuestion = (question: string) => {
+  inputText.value = question
+  sendMessage()
+}
+
+const sendMessage = async () => {
+  if (!inputText.value || sending.value) return
+
+  const question = inputText.value
+  inputText.value = ''
+  sending.value = true
+
+  messages.value.push({
+    role: 'user',
+    content: question,
+    displayedContent: question
+  })
+
+  await scrollToBottom()
+
+  messages.value.push({
+    role: 'assistant',
+    content: '',
+    displayedContent: '',
+    isLoading: true,
+    sources: []
+  })
+
+  try {
+    const { content, sources } = await callAI(question)
+    const lastIndex = messages.value.length - 1
+    messages.value[lastIndex].isLoading = false
+    messages.value[lastIndex].content = content
+
+    await typeText(lastIndex, content, sources)
+  } catch (e) {
+    const lastIndex = messages.value.length - 1
+    messages.value[lastIndex].isLoading = false
+    messages.value[lastIndex].displayedContent = '抱歉，AI 服务暂时不可用，请稍后再试。'
+  } finally {
+    sending.value = false
+    await scrollToBottom()
+  }
+}
+
+const typeText = async (msgIndex: number, fullText: string, sources: Source[]) => {
+  const chars = fullText.split('')
+  const typeSpeed = 15
+  let currentContent = ''
+
+  for (let i = 0; i < chars.length; i++) {
+    currentContent += chars[i]
+    messages.value[msgIndex].displayedContent = currentContent
+    messages.value[msgIndex].isTyping = true
+
+    if (i % 10 === 0) {
+      await scrollToBottom()
+      await new Promise(resolve => setTimeout(resolve, typeSpeed))
+    }
+  }
+
+  messages.value[msgIndex].isTyping = false
+  messages.value[msgIndex].sources = sources
+}
+
+const formatContent = (text: string): string => {
+  if (!text) return ''
+
+  let html = text
+    .replace(/^### (.+)$/gm, '<view class="h3">$1</view>')
+    .replace(/^## (.+)$/gm, '<view class="h2">$1</view>')
+    .replace(/^# (.+)$/gm, '<view class="h1">$1</view>')
+    .replace(/\*\*(.+?)\*\*/g, '<text class="bold">$1</text>')
+    .replace(/\*(.+?)\*/g, '<text class="italic">$1</text>')
+    .replace(/^- (.+)$/gm, '<view class="list-item">• $1</view>')
+    .replace(/^(\d+)\. (.+)$/gm, '<view class="list-item">$1. $2</view>')
+    .replace(/\|(.+)\|/g, (match) => {
+      const cells = match.split('|').filter(c => c.trim())
+      return '<view class="table-row">' + cells.map(c => '<text class="table-cell">' + c.trim() + '</text>').join('') + '</view>'
+    })
+    .replace(/\n\n/g, '</view><view class="paragraph">')
+    .replace(/\n/g, '<br/>')
+
+  html = '<view class="formatted-content"><view class="paragraph">' + html + '</view></view>'
+
+  return html
+}
+
+const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
+  try {
+    const [aiRes, caseRes, lawRes] = await Promise.all([
+      uni.request({
+        url: 'http://localhost:8080/api/v1/ai/chat',
+        method: 'POST',
+        data: { message: question },
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('token')
+        }
+      }),
+      uni.request({
+        url: 'http://localhost:8080/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
+      }),
+      uni.request({
+        url: 'http://localhost:8080/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
+      })
+    ])
+
+    let content = '抱歉，AI 服务暂时不可用，请稍后再试。'
+    const sources: Source[] = []
+
+    if (aiRes.data.code === 0) {
+      content = aiRes.data.data.content
+    }
+
+    if (caseRes.data.code === 0 && caseRes.data.data.cases) {
+      caseRes.data.data.cases.slice(0, 3).forEach((c: any) => {
+        sources.push({
+          title: c.title || c.caseNumber,
+          type: 'case',
+          id: c.id
+        })
+      })
+    }
+
+    if (lawRes.data.code === 0 && lawRes.data.data.laws) {
+      lawRes.data.data.laws.slice(0, 3).forEach((l: any) => {
+        sources.push({
+          title: l.name,
+          type: 'law',
+          id: l.id
+        })
+      })
+    }
+
+    return { content, sources }
+  } catch (e) {
+    console.error('AI调用失败', e)
+    return {
+      content: '抱歉，AI 服务暂时不可用，请稍后再试。',
+      sources: []
+    }
+  }
+}
+
+const scrollToBottom = async () => {
+  await nextTick()
+  scrollIntoView.value = 'msg-' + (messages.value.length - 1)
 }
 
 interface Message {
@@ -468,6 +680,134 @@ const scrollToBottom = async () => {
   &:active {
     transform: scale(0.95);
     box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.25);
+  }
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 4rpx;
+  height: 32rpx;
+  background: $primary-color;
+  margin-left: 4rpx;
+  animation: blink 0.8s infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.loading-dots {
+  display: flex;
+  gap: 6rpx;
+
+  .dot {
+    font-size: 20rpx;
+    animation: bounce 1.4s infinite ease-in-out both;
+
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+
+.loading-text {
+  margin-left: 12rpx;
+  color: $text-secondary;
+  font-size: 26rpx;
+}
+
+.btn-loading {
+  display: flex;
+  gap: 4rpx;
+  animation: pulse 1s infinite;
+
+  &:nth-child(1) { animation-delay: 0s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+:deep(.formatted-content) {
+  font-size: 30rpx;
+  line-height: 1.8;
+  color: $text-primary;
+
+  .h1 {
+    font-size: 40rpx;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 32rpx 0 20rpx;
+    padding-left: 16rpx;
+    border-left: 6rpx solid $primary-color;
+  }
+
+  .h2 {
+    font-size: 34rpx;
+    font-weight: 600;
+    color: #333;
+    margin: 28rpx 0 16rpx;
+    padding-left: 12rpx;
+    border-left: 4rpx solid $primary-color;
+  }
+
+  .h3 {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #444;
+    margin: 24rpx 0 12rpx;
+  }
+
+  .bold {
+    font-weight: 700;
+    color: #1890ff;
+  }
+
+  .italic {
+    font-style: italic;
+    color: $text-secondary;
+  }
+
+  .paragraph {
+    margin: 16rpx 0;
+  }
+
+  .list-item {
+    padding: 8rpx 0 8rpx 32rpx;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 12rpx;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8rpx;
+      height: 8rpx;
+      background: $primary-color;
+      border-radius: 50%;
+    }
+  }
+
+  .table-row {
+    display: flex;
+    padding: 12rpx 0;
+    border-bottom: 1rpx solid $border-color;
+
+    .table-cell {
+      flex: 1;
+      font-size: 26rpx;
+      color: $text-secondary;
+      text-align: center;
+    }
   }
 }
 </style>
