@@ -72,14 +72,19 @@ public class DocumentServiceImpl implements DocumentService {
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String generateDocument(Long userId, DocumentGenerateRequest request) throws Exception {
+    public String generateDocument(String userId, DocumentGenerateRequest request) throws Exception {
         log.info("开始生成文书：userId={}, templateId={}", userId, request.getTemplateId());
         
         // 1. 查询模板
         DocumentTemplate template = getTemplateById(request.getTemplateId());
         
         // 2. 拼接完整模板路径
-        String templateFilePath = templateDir + template.getFilePath();
+        String filePath = template.getFilePath();
+        // 去掉开头的 /templates，因为 templateDir 已经包含它
+        if (filePath.startsWith("/templates")) {
+            filePath = filePath.substring("/templates".length());
+        }
+        String templateFilePath = templateDir + filePath;
         log.info("模板文件路径：{}", templateFilePath);
         
         // 3. 检查模板文件是否存在
@@ -130,7 +135,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
     
     @Override
-    public List<Map<String, Object>> getUserHistory(Long userId) {
+    public List<Map<String, Object>> getUserHistory(String userId) {
         List<DocumentHistory> histories = historyMapper.selectByUserId(userId);
         List<Map<String, Object>> result = new ArrayList<>();
         
@@ -185,7 +190,7 @@ public class DocumentServiceImpl implements DocumentService {
     /**
      * 保存历史记录
      */
-    private void saveHistory(Long userId, Long templateId, String fileName, 
+    private void saveHistory(String userId, Long templateId, String fileName, 
                             String filePath, Map<String, Object> data) {
         DocumentHistory history = new DocumentHistory();
         history.setUserId(userId);

@@ -38,6 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                // 将 userId 设置到 request attribute 中，供 @RequestAttribute("userId") 使用
+                request.setAttribute("userId", userId);
             }
         } catch (Exception e) {
             log.error("无法设置用户认证信息: {}", e.getMessage());

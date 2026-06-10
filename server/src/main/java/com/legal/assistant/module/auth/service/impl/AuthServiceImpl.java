@@ -46,19 +46,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResponse emailLogin(EmailLoginRequest request) {
-        User user = userMapper.selectOne(
-            new LambdaQueryWrapper<User>().eq(User::getEmail, request.getEmail())
-        );
-
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new BusinessException(ResultCode.AUTH_CREDENTIALS_ERROR);
-        }
-
-        return buildLoginResponse(user);
-    }
-
-    @Override
     public LoginResponse register(EmailRegisterRequest request) {
         User existUser = userMapper.selectOne(
             new LambdaQueryWrapper<User>()
@@ -128,10 +115,12 @@ public class AuthServiceImpl implements AuthService {
 
     private User createUser(String phone) {
         User user = new User();
+        user.setId(java.util.UUID.randomUUID().toString());
         user.setPhone(phone);
         user.setNickname("用户" + phone.substring(phone.length() - 4));
         user.setRole("lawyer");
         user.setStatus(1);
+        user.setPasswordHash("$2a$10$dummy"); // 占位符，实际不会用到
         userMapper.insert(user);
         return user;
     }
@@ -179,12 +168,13 @@ public class AuthServiceImpl implements AuthService {
     
     private User createByEmail(String email) {
         User user = new User();
+        user.setId(java.util.UUID.randomUUID().toString());
         user.setEmail(email);
-        // 提取邮箱用户名作为昵称
         String nickname = email.substring(0, email.indexOf("@"));
         user.setNickname(nickname);
         user.setRole("lawyer");
         user.setStatus(1);
+        user.setPasswordHash("$2a$10$dummy");
         userMapper.insert(user);
         log.info("创建邮箱用户，userId={}, email={}", user.getId(), email);
         return user;

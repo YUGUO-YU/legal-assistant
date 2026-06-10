@@ -19,12 +19,6 @@
       }
     },
     {
-      "path": "pages/auth/email-login",
-      "style": {
-        "navigationBarTitleText": "邮箱登录"
-      }
-    },
-    {
       "path": "pages/auth/mini-login",
       "style": {
         "navigationBarTitleText": "微信登录",

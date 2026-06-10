@@ -5,7 +5,6 @@ import com.legal.assistant.module.auth.entity.User;
 
 public interface AuthService {
     LoginResponse phoneLogin(PhoneLoginRequest request);
-    LoginResponse emailLogin(EmailLoginRequest request);
     LoginResponse emailCodeLogin(EmailCodeLoginRequest request);
     LoginResponse register(EmailRegisterRequest request);
     void sendSmsCode(SendSmsRequest request);

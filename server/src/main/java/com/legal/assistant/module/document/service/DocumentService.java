@@ -29,7 +29,7 @@ public interface DocumentService {
     /**
      * 生成文书
      */
-    String generateDocument(Long userId, DocumentGenerateRequest request) throws Exception;
+    String generateDocument(String userId, DocumentGenerateRequest request) throws Exception;
     
     /**
      * 下载文件
@@ -39,5 +39,5 @@ public interface DocumentService {
     /**
      * 获取用户生成历史
      */
-    List<Map<String, Object>> getUserHistory(Long userId);
+    List<Map<String, Object>> getUserHistory(String userId);
 }

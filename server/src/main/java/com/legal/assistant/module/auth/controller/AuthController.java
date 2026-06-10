@@ -24,11 +24,6 @@ public class AuthController {
         return Result.success(authService.phoneLogin(request));
     }
 
-    @PostMapping("/email/login")
-    public Result<LoginResponse> emailLogin(@Valid @RequestBody EmailLoginRequest request) {
-        return Result.success(authService.emailLogin(request));
-    }
-
     @PostMapping("/wechat/login")
     public Result<LoginResponse> wechatLogin(@Valid @RequestBody WechatLoginRequest request) {
         return Result.success(wechatService.login(request));

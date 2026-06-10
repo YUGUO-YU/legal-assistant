@@ -62,7 +62,7 @@ public class DocumentController {
     @PostMapping("/generate")
     public Result<Map<String, String>> generate(
             @Valid @RequestBody DocumentGenerateRequest request,
-            @RequestAttribute("userId") Long userId) {
+            @RequestAttribute("userId") String userId) {
         try {
             String filePath = documentService.generateDocument(userId, request);
             
@@ -105,7 +105,7 @@ public class DocumentController {
      * 获取用户生成历史
      */
     @GetMapping("/history")
-    public Result<List<Map<String, Object>>> getHistory(@RequestAttribute("userId") Long userId) {
+    public Result<List<Map<String, Object>>> getHistory(@RequestAttribute("userId") String userId) {
         List<Map<String, Object>> history = documentService.getUserHistory(userId);
         return Result.success(history);
     }

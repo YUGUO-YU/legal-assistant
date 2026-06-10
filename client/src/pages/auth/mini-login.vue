@@ -67,6 +67,8 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
+declare const wx: any
+
 const authStore = useAuthStore()
 const loading = ref(false)
 const agreed = ref(false)

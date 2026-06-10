@@ -19,11 +19,6 @@ interface PhoneLoginParams {
   code: string
 }
 
-interface EmailLoginParams {
-  email: string
-  password: string
-}
-
 interface RegisterParams {
   phone: string
   email: string
@@ -35,6 +30,11 @@ interface RegisterParams {
 interface SendSmsParams {
   phone: string
   type?: string
+}
+
+interface EmailCodeLoginParams {
+  email: string
+  code: string
 }
 
 interface WechatLoginParams {
@@ -51,8 +51,8 @@ export const authService = {
     return api.post<LoginResponse>('/api/v1/auth/phone/login', data)
   },
 
-  emailLogin(data: EmailLoginParams) {
-    return api.post<LoginResponse>('/api/v1/auth/email/login', data)
+  emailCodeLogin(data: EmailCodeLoginParams) {
+    return api.post<LoginResponse>('/api/v1/auth/email/code/login', data)
   },
 
   wechatLogin(data: WechatLoginParams) {

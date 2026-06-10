@@ -416,7 +416,6 @@ function navigateTo(url: string) {
   color: $text-regular;
   font-weight: 500;
 }
-}
 
 .ai-section {
   .ai-card {

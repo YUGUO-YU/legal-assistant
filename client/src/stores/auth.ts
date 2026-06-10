@@ -41,12 +41,16 @@ export const useAuthStore = defineStore('auth', () => {
     return res.data
   }
 
-  async function loginByEmail(email: string, password: string) {
-    const res = await authService.emailLogin({ email, password })
+  async function loginByEmail(email: string, code: string) {
+    const res = await authService.emailCodeLogin({ email, code })
     setToken(res.data.token)
     setRefreshToken(res.data.refreshToken)
     setUserInfo(res.data.user)
     return res.data
+  }
+
+  async function sendEmailCode(email: string) {
+    return api.post('/api/v1/auth/email/code/send', { email, type: 'login' })
   }
 
   async function wechatLogin(params: { code: string; encryptedData?: string; iv?: string }) {
