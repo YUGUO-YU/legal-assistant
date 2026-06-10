@@ -217,6 +217,11 @@ const formatContent = (text: string): string => {
   return html
 }
 
+const scrollToBottom = async () => {
+  await nextTick()
+  scrollIntoView.value = 'msg-' + (messages.value.length - 1)
+}
+
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
     const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.1.32:8080'
@@ -273,116 +278,6 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
       sources: []
     }
   }
-}
-
-const scrollToBottom = async () => {
-  await nextTick()
-  scrollIntoView.value = 'msg-' + (messages.value.length - 1)
-}
-
-const askQuestion = (question: string) => {
-  inputText.value = question
-  sendMessage()
-}
-
-const sendMessage = async () => {
-  if (!inputText.value || sending.value) return
-
-  const question = inputText.value
-  inputText.value = ''
-  sending.value = true
-
-  messages.value.push({
-    role: 'user',
-    content: question
-  })
-
-  await scrollToBottom()
-
-  try {
-    const { content, sources } = await callAI(question)
-    messages.value.push({
-      role: 'assistant',
-      content: content,
-      sources: sources
-    })
-  } catch (e) {
-    messages.value.push({
-      role: 'assistant',
-      content: '抱歉，AI 服务暂时不可用，请稍后再试。'
-    })
-  } finally {
-    sending.value = false
-    await scrollToBottom()
-  }
-}
-
-const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
-  try {
-    const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.1.32:8080'
-    const [aiRes, caseRes, lawRes] = await Promise.all([
-      uni.request({
-        url: baseUrl + '/api/v1/ai/chat',
-        method: 'POST',
-        data: { message: question },
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + uni.getStorageSync('token')
-        }
-      }),
-      uni.request({
-        url: baseUrl + '/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
-      }),
-      uni.request({
-        url: baseUrl + '/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
-      })
-    ])
-
-    let content = '抱歉，AI 服务暂时不可用，请稍后再试。'
-    const sources: Source[] = []
-
-    // 处理AI响应
-    if (aiRes.data.code === 0) {
-      content = aiRes.data.data.content
-    }
-
-    // 处理案例数据
-    if (caseRes.data.code === 0 && caseRes.data.data.cases) {
-      const cases = caseRes.data.data.cases.slice(0, 3)
-      cases.forEach((c: any) => {
-        sources.push({
-          title: c.title || c.caseNumber,
-          type: 'case',
-          id: c.id
-        })
-      })
-    }
-
-    // 处理法规数据
-    if (lawRes.data.code === 0 && lawRes.data.data.laws) {
-      const laws = lawRes.data.data.laws.slice(0, 3)
-      laws.forEach((l: any) => {
-        sources.push({
-          title: l.name,
-          type: 'law',
-          id: l.id
-        })
-      })
-    }
-
-    return { content, sources }
-  } catch (e) {
-    console.error('AI调用失败', e)
-    return {
-      content: '抱歉，AI 服务暂时不可用，请稍后再试。',
-      sources: []
-    }
-  }
-}
-
-const scrollToBottom = async () => {
-  await nextTick()
-  scrollIntoView.value = 'msg-' + (messages.value.length - 1)
 }
 </script>
 
