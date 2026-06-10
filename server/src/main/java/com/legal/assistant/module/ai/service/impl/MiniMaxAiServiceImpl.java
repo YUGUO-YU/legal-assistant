@@ -48,8 +48,42 @@ public class MiniMaxAiServiceImpl implements AiService {
 
     @Override
     public ChatResponse chat(ChatRequest request) {
+        StringBuilder userPromptBuilder = new StringBuilder();
+        userPromptBuilder.append(request.getMessage());
+
+        if ((request.getLawSources() != null && !request.getLawSources().isEmpty()) ||
+            (request.getCaseSources() != null && !request.getCaseSources().isEmpty())) {
+            userPromptBuilder.append("\n\n=== 参考资料 ===");
+
+            if (request.getLawSources() != null && !request.getLawSources().isEmpty()) {
+                userPromptBuilder.append("\n【相关法规】：\n");
+                for (int i = 0; i < request.getLawSources().size(); i++) {
+                    Map<String, String> law = request.getLawSources().get(i);
+                    userPromptBuilder.append(i + 1).append(". ").append(law.get("name"));
+                    if (law.get("content") != null) {
+                        userPromptBuilder.append("：").append(law.get("content"));
+                    }
+                    userPromptBuilder.append("\n");
+                }
+            }
+
+            if (request.getCaseSources() != null && !request.getCaseSources().isEmpty()) {
+                userPromptBuilder.append("\n【相关案例】：\n");
+                for (int i = 0; i < request.getCaseSources().size(); i++) {
+                    Map<String, String> caseInfo = request.getCaseSources().get(i);
+                    userPromptBuilder.append(i + 1).append(". ").append(caseInfo.get("title"));
+                    if (caseInfo.get("content") != null) {
+                        userPromptBuilder.append("：").append(caseInfo.get("content"));
+                    }
+                    userPromptBuilder.append("\n");
+                }
+            }
+
+            userPromptBuilder.append("\n请根据以上参考资料回答用户问题，并务必在回答中标注每条法律条文或案例的来源。");
+        }
+
         if (!aiEnabled || apiKey == null || apiKey.isEmpty()) {
-            return getMockResponse(request.getMessage());
+            return getMockResponse(request.getMessage(), request.getLawSources(), request.getCaseSources());
         }
 
         try {
@@ -60,15 +94,17 @@ public class MiniMaxAiServiceImpl implements AiService {
                     "4. 帮助起草简单的法律文书\n" +
                     "5. 语言要专业但易懂，温暖且有帮助\n\n" +
                     "请注意：\n" +
-                    "- 不要提供具体的法律建议说'建议您咨询律师'\n" +
-                    "- 尽量给出实用的法律知识和方法\n" +
+                    "- 必须根据提供的参考资料回答，不要编造法律条文\n" +
+                    "- 每个法律条文都要标注来源，如：【来源：《中华人民共和国合同法》第X条】\n" +
+                    "- 每个案例都要标注来源，如：【来源：XXX案】\n" +
+                    "- 如果资料不足，明确说明哪些内容是依据不足需要核实\n" +
                     "- 如果涉及复杂案件，引导用户寻求专业律师帮助";
 
             Map<String, Object> requestBody = Map.of(
                 "model", model,
                 "messages", List.of(
                     Map.of("role", "system", "content", systemPrompt),
-                    Map.of("role", "user", "content", request.getMessage())
+                    Map.of("role", "user", "content", userPromptBuilder.toString())
                 ),
                 "max_tokens", maxTokens,
                 "temperature", temperature,
@@ -92,11 +128,11 @@ public class MiniMaxAiServiceImpl implements AiService {
                 return parseResponse(response.body());
             } else {
                 log.error("AI API error: {} - {}", response.statusCode(), response.body());
-                return getMockResponse(request.getMessage());
+                return getMockResponse(request.getMessage(), request.getLawSources(), request.getCaseSources());
             }
         } catch (Exception e) {
             log.error("AI chat error", e);
-            return getMockResponse(request.getMessage());
+            return getMockResponse(request.getMessage(), request.getLawSources(), request.getCaseSources());
         }
     }
 
@@ -122,23 +158,50 @@ public class MiniMaxAiServiceImpl implements AiService {
                     .build();
         } catch (Exception e) {
             log.error("Parse AI response error", e);
-            return getMockResponse("");
+            return getMockResponse("", null, null);
         }
     }
 
-    private ChatResponse getMockResponse(String question) {
-        String response = "您的问题是：「" + question + "」\n\n" +
-                "根据我的分析，这是一个涉及民事法律关系的问题。\n\n" +
-                "建议您：\n" +
-                "1. 收集相关证据材料\n" +
-                "2. 明确诉讼请求\n" +
-                "3. 了解相关法律规定\n" +
-                "4. 必要时咨询专业律师\n\n" +
-                "您还想了解更多信息吗？";
+    private ChatResponse getMockResponse(String question, List<Map<String, String>> lawSources, List<Map<String, String>> caseSources) {
+        StringBuilder response = new StringBuilder();
+        response.append("您的问题是：「").append(question).append("」\n\n");
+
+        if ((lawSources != null && !lawSources.isEmpty()) || (caseSources != null && !caseSources.isEmpty())) {
+            response.append("根据检索到的资料，我为您解答如下：\n\n");
+
+            if (lawSources != null && !lawSources.isEmpty()) {
+                response.append("## 相关法律法规\n\n");
+                for (Map<String, String> law : lawSources) {
+                    response.append("- ").append(law.get("name"));
+                    if (law.get("content") != null) {
+                        response.append("：").append(law.get("content"));
+                    }
+                    response.append(" 【来源】\n");
+                }
+                response.append("\n");
+            }
+
+            if (caseSources != null && !caseSources.isEmpty()) {
+                response.append("## 相关案例参考\n\n");
+                for (Map<String, String> caseInfo : caseSources) {
+                    response.append("- ").append(caseInfo.get("title"));
+                    if (caseInfo.get("content") != null) {
+                        response.append("：").append(caseInfo.get("content"));
+                    }
+                    response.append(" 【来源】\n");
+                }
+            }
+        } else {
+            response.append("抱歉，目前没有检索到相关的法律资料来回答您的问题。\n\n");
+            response.append("建议您：\n");
+            response.append("1. 尝试使用更具体的关键词搜索\n");
+            response.append("2. 换个角度描述您的问题\n");
+            response.append("3. 如需专业法律帮助，请咨询律师\n");
+        }
 
         return ChatResponse.builder()
                 .id("mock-" + System.currentTimeMillis())
-                .content(response)
+                .content(response.toString())
                 .model("mock")
                 .build();
     }

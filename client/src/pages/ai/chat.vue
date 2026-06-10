@@ -30,14 +30,16 @@
               <text class="loading-text">AI 思考中...</text>
             </view>
             <view class="sources" v-if="msg.sources && msg.sources.length > 0">
-              <view class="sources-title">📚 参考资料：</view>
+              <view class="sources-title">📚 参考资料</view>
+              <view class="sources-note">以下为相关法律法规及案例摘要，仅供参考</view>
               <view
                 v-for="(source, idx) in msg.sources"
                 :key="idx"
                 class="source-item"
               >
-                <text class="source-icon">{{ source.type === 'case' ? '📋' : '📚' }}</text>
+                <text class="source-icon">{{ source.type === 'case' ? '📋' : '📜' }}</text>
                 <text class="source-text">{{ source.title }}</text>
+                <text class="source-type">{{ source.type === 'case' ? '案例' : '法规' }}</text>
               </view>
             </view>
           </view>
@@ -209,15 +211,27 @@ const formatContent = (text: string): string => {
   if (!text) return ''
 
   let html = text
-    .replace(/^### (.+)$/gm, '<view class="h3">[$1]</view>')
-    .replace(/^## (.+)$/gm, '<view class="h2">[$1]</view>')
-    .replace(/^# (.+)$/gm, '<view class="h1">[$1]</view>')
-    .replace(/\*\*(.+?)\*\*/g, '【$1】')
-    .replace(/\*(.+?)\*/g, '『$1』')
-    .replace(/^- (.+)$/gm, '<view class="list-item">• $1</view>')
-    .replace(/^(\d+)\. (.+)$/gm, '<view class="list-item">$1. $2</view>')
-    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^### (.+)$/gm, '<view class="h3">$1</view>')
+    .replace(/^## (.+)$/gm, '<view class="h2">$1</view>')
+    .replace(/^# (.+)$/gm, '<view class="h1">$1</view>')
+    .replace(/^- (.+)$/gm, '<view class="list-item">$1</view>')
+    .replace(/^(\d+)\. (.+)$/gm, '<view class="list-item-num">$1. $2</view>')
+    .replace(/>(.+)$/gm, '<view class="quote">$1</view>')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br/>')
+
+  html = '<p>' + html + '</p>'
+  html = html.replace(/<p><br\/>/g, '<p>')
+  html = html.replace(/<br\/><\/p>/g, '</p>')
+  html = html.replace(/<p>(<view class="h[123]">)/g, '$1')
+  html = html.replace(/(<\/view>)<\/p>/g, '$1')
+  html = html.replace(/<p>(<strong>)/g, '$1')
+  html = html.replace(/(<\/strong>)<\/p>/g, '$1')
+  html = html.replace(/<p>(<em>)/g, '$1')
+  html = html.replace(/(<\/em>)<\/p>/g, '$1')
 
   return html
 }
@@ -230,16 +244,8 @@ const scrollToBottom = async () => {
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
     const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.2.5:8080'
-    const [aiRes, caseRes, lawRes] = await Promise.all([
-      uni.request({
-        url: baseUrl + '/api/v1/ai/chat',
-        method: 'POST',
-        data: { message: question },
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + uni.getStorageSync('token')
-        }
-      }),
+
+    const [caseRes, lawRes] = await Promise.all([
       uni.request({
         url: baseUrl + '/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
       }),
@@ -247,6 +253,52 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
         url: baseUrl + '/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
       })
     ])
+
+    const lawSources: { name: string; content?: string }[] = []
+    const caseSources: { title: string; content?: string }[] = []
+    const sources: Source[] = []
+
+    if (lawRes.data.code === 0 && lawRes.data.data.laws) {
+      lawRes.data.data.laws.slice(0, 3).forEach((l: any) => {
+        lawSources.push({
+          name: l.name,
+          content: l.content || l.description
+        })
+        sources.push({
+          title: l.name,
+          type: 'law',
+          id: l.id
+        })
+      })
+    }
+
+    if (caseRes.data.code === 0 && caseRes.data.data.cases) {
+      caseRes.data.data.cases.slice(0, 3).forEach((c: any) => {
+        caseSources.push({
+          title: c.title || c.caseNumber,
+          content: c.brief || c.description
+        })
+        sources.push({
+          title: c.title || c.caseNumber,
+          type: 'case',
+          id: c.id
+        })
+      })
+    }
+
+    const aiRes = await uni.request({
+      url: baseUrl + '/api/v1/ai/chat',
+      method: 'POST',
+      data: {
+        message: question,
+        lawSources,
+        caseSources
+      },
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + uni.getStorageSync('token')
+      }
+    })
 
     if (aiRes.statusCode === 401) {
       uni.removeStorageSync('token')
@@ -256,30 +308,9 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
     }
 
     let content = '抱歉，AI 服务暂时不可用，请稍后再试。'
-    const sources: Source[] = []
 
     if (aiRes.data.code === 0) {
       content = aiRes.data.data.content
-    }
-
-    if (caseRes.data.code === 0 && caseRes.data.data.cases) {
-      caseRes.data.data.cases.slice(0, 3).forEach((c: any) => {
-        sources.push({
-          title: c.title || c.caseNumber,
-          type: 'case',
-          id: c.id
-        })
-      })
-    }
-
-    if (lawRes.data.code === 0 && lawRes.data.data.laws) {
-      lawRes.data.data.laws.slice(0, 3).forEach((l: any) => {
-        sources.push({
-          title: l.name,
-          type: 'law',
-          id: l.id
-        })
-      })
     }
 
     return { content, sources }
@@ -360,15 +391,72 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
 }
 
 .text {
-  padding: 28rpx 32rpx;
+  padding: 24rpx 28rpx;
   background: $background-white;
   border-radius: $radius-lg $radius-lg $radius-lg 4rpx;
-  font-size: 30rpx;
-  line-height: 1.6;
+  font-size: 28rpx;
+  line-height: 1.8;
   color: $text-primary;
-  box-shadow: $shadow-md;
-  white-space: pre-wrap;
+  box-shadow: $shadow-sm;
+  white-space: normal;
   word-break: break-all;
+
+  :deep(p) {
+    margin: 12rpx 0;
+    line-height: 1.8;
+  }
+
+  :deep(.h1) {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 20rpx 0 16rpx;
+    padding-bottom: 8rpx;
+    border-bottom: 2rpx solid #e5e7eb;
+  }
+
+  :deep(.h2) {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #333;
+    margin: 16rpx 0 12rpx;
+  }
+
+  :deep(.h3) {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #444;
+    margin: 12rpx 0 8rpx;
+  }
+
+  :deep(strong) {
+    font-weight: 700;
+    color: #1890ff;
+  }
+
+  :deep(em) {
+    font-style: italic;
+    color: $text-secondary;
+  }
+
+  :deep(.list-item) {
+    padding: 6rpx 0 6rpx 24rpx;
+    margin: 4rpx 0;
+  }
+
+  :deep(.list-item-num) {
+    padding: 6rpx 0 6rpx 24rpx;
+    margin: 4rpx 0;
+  }
+
+  :deep(.quote) {
+    padding: 12rpx 20rpx;
+    margin: 12rpx 0;
+    background: #f8f9fa;
+    border-left: 4rpx solid $primary-color;
+    border-radius: 0 8rpx 8rpx 0;
+    color: $text-secondary;
+  }
 }
 
 .message.user .text {
@@ -405,11 +493,11 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
 }
 
 .sources {
-  margin-top: 20rpx;
+  margin-top: 24rpx;
   padding: 20rpx 24rpx;
-  background: #f0f9ff;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f4ff 100%);
   border-radius: $radius-md;
-  border-left: 4rpx solid #1890ff;
+  border: 1rpx solid #91caff;
 }
 
 .sources-title {
@@ -417,19 +505,36 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
   color: #1890ff;
   font-weight: 600;
   margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.sources-note {
+  font-size: 20rpx;
+  color: #8c8c8c;
+  margin-bottom: 12rpx;
+  font-style: italic;
 }
 
 .source-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8rpx;
-  padding: 8rpx 0;
+  padding: 10rpx 0;
   font-size: 24rpx;
-  color: $text-secondary;
+  color: $text-regular;
+  border-bottom: 1rpx solid #e5e7eb;
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .source-icon {
   font-size: 24rpx;
+  flex-shrink: 0;
+  margin-top: 2rpx;
 }
 
 .source-text {
@@ -437,6 +542,12 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.source-type {
+  font-size: 20rpx;
+  color: #8c8c8c;
+  flex-shrink: 0;
 }
 
 .input-area {
