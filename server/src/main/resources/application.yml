@@ -58,11 +58,11 @@ sms:
 
 mail:
   enabled: true
-  host: ${MAIL_HOST:smtp.qq.com}
-  port: ${MAIL_PORT:587}
-  username: ${MAIL_USERNAME:}
-  password: ${MAIL_PASSWORD:}
-  from: ${MAIL_FROM:noreply@legal-assistant.com}
+  host: smtp.qq.com
+  port: 587
+  username: hongyuyx@foxmail.com
+  password: omkziezavdfqdhic
+  from: noreply@legal-assistant.com
 
 cos:
   secret-id: ${COS_SECRET_ID:}
