@@ -202,6 +202,7 @@ async function handleLogin() {
 
   try {
     await authStore.loginByPhone(phone.value, code.value)
+    ;(uni as any).__authStore = authStore
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/index/index' })
@@ -244,16 +245,18 @@ async function handleEmailLogin() {
   emailLoading.value = true
 
   try {
-    const api = await import('@/services/api')
-    const res = await api.default.post('/api/v1/auth/email/code/login', {
+    const apiModule = await import('@/services/api')
+    const api = apiModule.default
+    const res = await api.post('/api/v1/auth/email/code/login', {
       email: email.value,
       code: emailCode.value
     })
-    
-    uni.setStorageSync('token', res.data.token)
-    uni.setStorageSync('refreshToken', res.data.refreshToken)
-    uni.setStorageSync('userInfo', res.data.user)
-    
+
+    authStore.setToken(res.data.token)
+    authStore.setRefreshToken(res.data.refreshToken)
+    authStore.setUserInfo(res.data.user)
+    ;(uni as any).__authStore = authStore
+
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/index/index' })

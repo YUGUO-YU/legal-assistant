@@ -1,5 +1,5 @@
-const BASE_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:8080' 
+const BASE_URL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:8080'
   : 'http://localhost:8080'
 
 interface RequestOptions {
@@ -16,8 +16,6 @@ interface ResponseData<T = any> {
 }
 
 class Request {
-  private token: string = ''
-
   constructor() {
     const savedBaseUrl = uni.getStorageSync('baseUrl')
     if (savedBaseUrl) {
@@ -34,23 +32,20 @@ class Request {
     uni.setStorageSync('baseUrl', url)
   }
 
-  setToken(token: string) {
-    this.token = token
-  }
-
-  getToken(): string {
-    return this.token
-  }
-
-  clearToken() {
-    this.token = ''
+  private getToken(): string {
+    const authStore = (uni as any).__authStore
+    if (authStore?.token) {
+      return authStore.token
+    }
+    return uni.getStorageSync('token') || ''
   }
 
   async request<T = any>(options: RequestOptions): Promise<ResponseData<T>> {
     const { url, method = 'GET', data, header = {} } = options
 
-    if (this.token) {
-      header['Authorization'] = `Bearer ${this.token}`
+    const token = this.getToken()
+    if (token) {
+      header['Authorization'] = `Bearer ${token}`
     }
 
     header['Content-Type'] = 'application/json'
@@ -67,7 +62,9 @@ class Request {
 
       if (result.code !== 0) {
         if (result.code === 2001 || result.code === 2002) {
-          this.clearToken()
+          uni.removeStorageSync('token')
+          uni.removeStorageSync('refreshToken')
+          uni.removeStorageSync('userInfo')
           uni.navigateTo({ url: '/pages/auth/login' })
         }
         throw new Error(result.message)
@@ -75,10 +72,12 @@ class Request {
 
       return result
     } catch (error: any) {
-      uni.showToast({
-        title: error.message || '请求失败',
-        icon: 'none'
-      })
+      if (error.message && !error.message.includes('请求失败')) {
+        uni.showToast({
+          title: error.message || '请求失败',
+          icon: 'none'
+        })
+      }
       throw error
     }
   }

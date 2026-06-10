@@ -4,15 +4,16 @@ import { useAuthStore } from '@/stores/auth'
 
 onLaunch(() => {
   console.log('App Launch')
-  
-  // 初始化用户登录状态
+
   const authStore = useAuthStore()
   authStore.initFromStorage()
-  
+
+  ;(uni as any).__authStore = authStore
+
   // #ifdef H5
   console.log('Running on H5 (Web)')
   // #endif
-  
+
   // #ifdef MP-WEIXIN
   console.log('Running on WeChat Mini Program')
   // #endif

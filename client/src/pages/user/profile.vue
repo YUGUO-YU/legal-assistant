@@ -6,7 +6,7 @@
         <view class="avatar-edit">修改</view>
       </view>
       <view class="user-info">
-        <view class="username">{{ user.username }}</view>
+        <view class="username">{{ user.username || user.nickname || '用户' }}</view>
         <view class="role">{{ user.role === 'lawyer' ? '律师' : '用户' }}</view>
         <view class="firm" v-if="user.firmName">{{ user.firmName }}</view>
       </view>
@@ -101,11 +101,17 @@ onMounted(async () => {
 })
 
 const loadProfile = async () => {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
+  }
+
   try {
     const res = await userApi.getProfile()
     user.value = res.data
-  } catch (e) {
+  } catch (e: any) {
     console.error('加载用户信息失败', e)
+    uni.showToast({ title: '加载失败: ' + (e.message || '请检查服务器配置'), icon: 'none' })
   }
 }
 
