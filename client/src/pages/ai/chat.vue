@@ -93,7 +93,7 @@ interface Message {
   sources?: Source[]
 }
 
-const messages = ref<Message[]>([])
+const messages = ref<Message[]>([] as Message[])
 const inputText = ref('')
 const sending = ref(false)
 const scrollTop = ref(0)
