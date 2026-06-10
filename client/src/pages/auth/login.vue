@@ -204,7 +204,7 @@ async function handleLogin() {
     await authStore.loginByPhone(phone.value, code.value)
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => {
-      uni.navigateTo({ url: '/pages/index/index' })
+      uni.switchTab({ url: '/pages/index/index' })
     }, 1000)
   } catch (error: any) {
     uni.showToast({ title: error.message || '登录失败', icon: 'none' })
@@ -256,7 +256,7 @@ async function handleEmailLogin() {
     
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => {
-      uni.navigateTo({ url: '/pages/index/index' })
+      uni.switchTab({ url: '/pages/index/index' })
     }, 1000)
   } catch (error: any) {
     uni.showToast({ title: error.message || '登录失败', icon: 'none' })
