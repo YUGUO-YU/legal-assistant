@@ -277,8 +277,7 @@ function goToMiniLogin() {
 }
 
 function showServerConfig() {
-  const api = (window as any).api || (uni as any).api
-  const currentUrl = api?.baseUrl || 'http://localhost:8080'
+  const currentUrl = uni.getStorageSync('baseUrl') || 'http://localhost:8080'
 
   uni.showModal({
     title: '服务器设置',
@@ -299,7 +298,7 @@ function showServerConfig() {
         apiModule.baseUrl = url
 
         uni.setStorageSync('baseUrl', url)
-        uni.showToast({ title: '服务器地址已更新', icon: 'success' })
+        uni.showToast({ title: '服务器地址已更新，请重启应用', icon: 'success' })
       }
     }
   })

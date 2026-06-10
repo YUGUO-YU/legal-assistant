@@ -1,6 +1,4 @@
-const BASE_URL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:8080'
-  : 'http://localhost:8080'
+const DEFAULT_BASE_URL = 'http://localhost:8080'
 
 interface RequestOptions {
   url: string
@@ -16,27 +14,18 @@ interface ResponseData<T = any> {
 }
 
 class Request {
-  constructor() {
-    const savedBaseUrl = uni.getStorageSync('baseUrl')
-    if (savedBaseUrl) {
-      (this as any).baseUrl = savedBaseUrl
-    }
-  }
+  private _baseUrl: string = ''
 
   get baseUrl(): string {
-    return (this as any).baseUrl || BASE_URL
+    return this._baseUrl || uni.getStorageSync('baseUrl') || DEFAULT_BASE_URL
   }
 
   set baseUrl(url: string) {
-    (this as any).baseUrl = url
+    this._baseUrl = url
     uni.setStorageSync('baseUrl', url)
   }
 
   private getToken(): string {
-    const authStore = (uni as any).__authStore
-    if (authStore?.token) {
-      return authStore.token
-    }
     return uni.getStorageSync('token') || ''
   }
 

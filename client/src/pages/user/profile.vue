@@ -101,7 +101,8 @@ onMounted(async () => {
 })
 
 const loadProfile = async () => {
-  if (!authStore.isLoggedIn) {
+  const token = uni.getStorageSync('token')
+  if (!token) {
     uni.navigateTo({ url: '/pages/auth/login' })
     return
   }
@@ -111,7 +112,12 @@ const loadProfile = async () => {
     user.value = res.data
   } catch (e: any) {
     console.error('加载用户信息失败', e)
-    uni.showToast({ title: '加载失败: ' + (e.message || '请检查服务器配置'), icon: 'none' })
+    if (e.message && (e.message.includes('401') || e.message.includes('未授权'))) {
+      uni.removeStorageSync('token')
+      uni.navigateTo({ url: '/pages/auth/login' })
+    } else {
+      uni.showToast({ title: '加载失败，请检查网络', icon: 'none' })
+    }
   }
 }
 

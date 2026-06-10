@@ -174,7 +174,8 @@ function handleSearch() {
 }
 
 function navigateTo(url: string) {
-  if (!authStore.isLoggedIn && url !== '/pages/case/search' && url !== '/pages/law/search') {
+  const token = uni.getStorageSync('token')
+  if (!token && url !== '/pages/case/search' && url !== '/pages/law/search') {
     uni.showToast({ title: '请先登录', icon: 'none' })
     uni.navigateTo({ url: '/pages/auth/login' })
     return
