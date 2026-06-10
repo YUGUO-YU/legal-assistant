@@ -224,7 +224,7 @@ const scrollToBottom = async () => {
 
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
-    const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.1.32:8080'
+    const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.2.5:8080'
     const [aiRes, caseRes, lawRes] = await Promise.all([
       uni.request({
         url: baseUrl + '/api/v1/ai/chat',

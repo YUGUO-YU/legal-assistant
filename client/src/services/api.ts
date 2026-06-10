@@ -1,4 +1,4 @@
-const DEFAULT_BASE_URL = 'http://192.168.1.32:8080'
+const DEFAULT_BASE_URL = 'http://192.168.2.5:8080'
 
 interface RequestOptions {
   url: string
