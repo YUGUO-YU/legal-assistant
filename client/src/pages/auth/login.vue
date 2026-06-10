@@ -124,6 +124,11 @@
         <text>和</text>
         <text class="link">《隐私政策》</text>
       </view>
+
+      <view class="server-config" @click="showServerConfig">
+        <text class="config-icon">⚙️</text>
+        <text class="config-text">服务器设置</text>
+      </view>
     </view>
   </view>
 </template>
@@ -266,6 +271,35 @@ function switchMode() {
 
 function goToMiniLogin() {
   uni.navigateTo({ url: '/pages/auth/mini-login' })
+}
+
+function showServerConfig() {
+  const api = (window as any).api || (uni as any).api
+  const currentUrl = api?.baseUrl || 'http://localhost:8080'
+
+  uni.showModal({
+    title: '服务器设置',
+    editable: true,
+    placeholderText: '请输入服务器地址',
+    content: currentUrl,
+    success: (res: any) => {
+      if (res.confirm && res.content) {
+        let url = res.content.trim()
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'http://' + url
+        }
+        if (url.endsWith('/')) {
+          url = url.slice(0, -1)
+        }
+
+        const apiModule = require('@/services/api').default
+        apiModule.baseUrl = url
+
+        uni.setStorageSync('baseUrl', url)
+        uni.showToast({ title: '服务器地址已更新', icon: 'success' })
+      }
+    }
+  })
 }
 </script>
 
@@ -707,6 +741,24 @@ function goToMiniLogin() {
 
   .other-text {
     font-size: 12px;
+  }
+}
+
+.server-config {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 30rpx;
+  margin-top: 40rpx;
+
+  .config-icon {
+    font-size: 24rpx;
+  }
+
+  .config-text {
+    font-size: 24rpx;
+    color: $text-secondary;
   }
 }
 </style>

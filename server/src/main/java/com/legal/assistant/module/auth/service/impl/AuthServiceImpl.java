@@ -8,6 +8,7 @@ import com.legal.assistant.module.auth.dto.*;
 import com.legal.assistant.module.auth.entity.User;
 import com.legal.assistant.module.auth.mapper.UserMapper;
 import com.legal.assistant.module.auth.service.AuthService;
+import com.legal.assistant.module.mail.service.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MailService mailService;
 
     private static final String SMS_CODE_PREFIX = "sms:code:";
     private static final long SMS_CODE_EXPIRE = 5L;
@@ -163,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
         
         log.info("发送邮件验证码：email={}, code={}", email, code);
         
-        // TODO: 实际调用邮件服务发送邮件
+        mailService.sendVerificationCode(email, code);
     }
     
     private User createByEmail(String email) {

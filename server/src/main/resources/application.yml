@@ -56,6 +56,14 @@ sms:
   app-id: ${SMS_APP_ID:}
   template-login: ${SMS_TEMPLATE_LOGIN:your-template-id}
 
+mail:
+  enabled: true
+  host: ${MAIL_HOST:smtp.qq.com}
+  port: ${MAIL_PORT:587}
+  username: ${MAIL_USERNAME:}
+  password: ${MAIL_PASSWORD:}
+  from: ${MAIL_FROM:noreply@legal-assistant.com}
+
 cos:
   secret-id: ${COS_SECRET_ID:}
   secret-key: ${COS_SECRET_KEY:}
