@@ -285,55 +285,6 @@ const scrollToBottom = async () => {
   scrollIntoView.value = 'msg-' + (messages.value.length - 1)
 }
 
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-  sources?: Source[]
-}
-
-const messages = ref<Message[]>([])
-const inputText = ref('')
-const sending = ref(false)
-const scrollTop = ref(0)
-const scrollIntoView = ref('')
-
-const quickQuestions = [
-  '劳动纠纷怎么处理？',
-  '民间借贷利息怎么计算？',
-  '房屋租赁合同要注意什么？',
-  '交通事故责任如何划分？'
-]
-
-onMounted(() => {
-  // 获取页面参数
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1] as any
-  const query = currentPage.options?.query || ''
-  
-  // 如果有传入query参数，自动发送
-  if (query) {
-    inputText.value = decodeURIComponent(query)
-    setTimeout(() => {
-      sendMessage()
-    }, 300)
-  }
-  
-  const context = currentPage.options?.context || ''
-  const id = currentPage.options?.id || ''
-
-  if (context === 'case') {
-    messages.value.push({
-      role: 'assistant',
-      content: '您好，我已加载该案例信息。请问您想了解案例的哪些方面？比如案件分析、判决预测、法律建议等。'
-    })
-  } else if (context === 'company') {
-    messages.value.push({
-      role: 'assistant',
-      content: '您好，我已加载该企业信息。请问您想了解企业的哪些方面？比如企业风险分析、合作建议、法律尽职调查等。'
-    })
-  }
-})
-
 const askQuestion = (question: string) => {
   inputText.value = question
   sendMessage()
@@ -373,7 +324,6 @@ const sendMessage = async () => {
 
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
-    // 并行调用AI和法律数据API
     const [aiRes, caseRes, lawRes] = await Promise.all([
       uni.request({
         url: 'http://localhost:8080/api/v1/ai/chat',
