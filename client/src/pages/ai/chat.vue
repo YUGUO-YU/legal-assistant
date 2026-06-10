@@ -204,21 +204,15 @@ const formatContent = (text: string): string => {
   if (!text) return ''
 
   let html = text
-    .replace(/^### (.+)$/gm, '<view class="h3">$1</view>')
-    .replace(/^## (.+)$/gm, '<view class="h2">$1</view>')
-    .replace(/^# (.+)$/gm, '<view class="h1">$1</view>')
-    .replace(/\*\*(.+?)\*\*/g, '<text class="bold">$1</text>')
-    .replace(/\*(.+?)\*/g, '<text class="italic">$1</text>')
+    .replace(/^### (.+)$/gm, '<view class="h3">[$1]</view>')
+    .replace(/^## (.+)$/gm, '<view class="h2">[$1]</view>')
+    .replace(/^# (.+)$/gm, '<view class="h1">[$1]</view>')
+    .replace(/\*\*(.+?)\*\*/g, '【$1】')
+    .replace(/\*(.+?)\*/g, '『$1』')
     .replace(/^- (.+)$/gm, '<view class="list-item">• $1</view>')
     .replace(/^(\d+)\. (.+)$/gm, '<view class="list-item">$1. $2</view>')
-    .replace(/\|(.+)\|/g, (match) => {
-      const cells = match.split('|').filter(c => c.trim())
-      return '<view class="table-row">' + cells.map(c => '<text class="table-cell">' + c.trim() + '</text>').join('') + '</view>'
-    })
-    .replace(/\n\n/g, '</view><view class="paragraph">')
+    .replace(/\n\n/g, '<br/><br/>')
     .replace(/\n/g, '<br/>')
-
-  html = '<view class="formatted-content"><view class="paragraph">' + html + '</view></view>'
 
   return html
 }
