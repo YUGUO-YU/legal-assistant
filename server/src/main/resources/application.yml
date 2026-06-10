@@ -65,6 +65,34 @@ cos:
 third-party:
   api-key: ${THIRD_PARTY_API_KEY:}
 
+ai:
+  enabled: true
+  provider: minimax
+  model: MiniMax-M2.7
+  base-url: https://api.minimax.chat/v1
+  api-key: sk-cp-ekoYcsSAxZvJrF7fvTa6Ysotr5tUdq0tuDip1T288mxFO2VoH6oguSDnUvHUyyrpY1BzzQeifVkOTrSZMZ_gnr1NrvimwFs7IWccNtjjqMyLq1wOEBuagUs
+  max-tokens: 2048
+  temperature: 0.7
+
+legal-data:
+  enabled: true
+  wenshu:
+    enabled: false
+    app-key: ${WENSHU_APP_KEY:}
+    base-url: https://wenshu.court.gov.cn
+  pkbd:
+    enabled: false
+    api-key: ${PKBD_API_KEY:}
+    base-url: https://api.pkbd.cn
+  law:
+    enabled: true
+    base-url: https://api.chinalaw.org
+    api-key: ${LAW_API_KEY:}
+  company:
+    enabled: true
+    provider: tianyancha
+    api-key: ${TIANYANCHA_API_KEY:}
+
 logging:
   level:
     com.legal.assistant: debug

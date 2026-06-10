@@ -18,6 +18,7 @@ export interface CaseItem {
   date: string
   parties: string
   status: string
+  source?: string
 }
 
 export interface CaseSearchResponse {
@@ -43,7 +44,7 @@ export interface CaseDetailResponse {
 export const caseApi = {
   search(params: CaseSearchRequest) {
     return request<CaseSearchResponse>({
-      url: '/api/v1/cases/search',
+      url: '/api/v1/legal/cases/search',
       method: 'GET',
       data: params
     })

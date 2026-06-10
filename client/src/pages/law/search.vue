@@ -39,6 +39,9 @@
           <text class="law-number">{{ item.lawNumber }}</text>
           <text class="law-date">施行日期: {{ item.effectiveDate }}</text>
         </view>
+        <view class="law-source" v-if="item.source">
+          <text class="source-tag">📚 {{ item.source }}</text>
+        </view>
       </view>
 
       <view v-if="loading" class="loading">
@@ -301,6 +304,21 @@ const goToDetail = (id: string) => {
 
 .law-number {
   font-weight: 500;
+}
+
+.law-source {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed $border-color;
+}
+
+.source-tag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: #f0f9ff;
+  color: #1890ff;
+  font-size: 22rpx;
+  border-radius: $radius-sm;
 }
 
 .loading, .no-more, .empty {

@@ -19,6 +19,17 @@
           <view class="content">
             <view class="text" v-if="msg.content">{{ msg.content }}</view>
             <view class="loading" v-else>思考中...</view>
+            <view class="sources" v-if="msg.sources && msg.sources.length > 0">
+              <view class="sources-title">📚 参考资料：</view>
+              <view
+                v-for="(source, idx) in msg.sources"
+                :key="idx"
+                class="source-item"
+              >
+                <text class="source-icon">{{ source.type === 'case' ? '📋' : '📚' }}</text>
+                <text class="source-text">{{ source.title }}</text>
+              </view>
+            </view>
           </view>
         </view>
       </view>
@@ -56,9 +67,16 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 
+interface Source {
+  title: string
+  type: 'case' | 'law' | 'company'
+  id?: string
+}
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  sources?: Source[]
 }
 
 const messages = ref<Message[]>([])
@@ -68,10 +86,10 @@ const scrollTop = ref(0)
 const scrollIntoView = ref('')
 
 const quickQuestions = [
-  '帮我起草一份房屋租赁合同',
-  '合同违约怎么处理？',
-  '如何查询企业工商信息？',
-  '民间借贷利息怎么计算？'
+  '劳动纠纷怎么处理？',
+  '民间借贷利息怎么计算？',
+  '房屋租赁合同要注意什么？',
+  '交通事故责任如何划分？'
 ]
 
 onMounted(() => {
@@ -124,10 +142,11 @@ const sendMessage = async () => {
   await scrollToBottom()
 
   try {
-    const response = await callAI(question)
+    const { content, sources } = await callAI(question)
     messages.value.push({
       role: 'assistant',
-      content: response
+      content: content,
+      sources: sources
     })
   } catch (e) {
     messages.value.push({
@@ -140,12 +159,67 @@ const sendMessage = async () => {
   }
 }
 
-const callAI = async (question: string): Promise<string> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`您的问题是："${question}"\n\n根据我的分析，这是一个涉及民事法律关系的问题。建议您：\n1. 收集相关证据材料\n2. 明确诉讼请求\n3. 必要时咨询专业律师\n\n您还想了解更多信息吗？`)
-    }, 1500)
-  })
+const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
+  try {
+    // 并行调用AI和法律数据API
+    const [aiRes, caseRes, lawRes] = await Promise.all([
+      uni.request({
+        url: 'http://localhost:8080/api/v1/ai/chat',
+        method: 'POST',
+        data: { message: question },
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('token')
+        }
+      }),
+      uni.request({
+        url: 'http://localhost:8080/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
+      }),
+      uni.request({
+        url: 'http://localhost:8080/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
+      })
+    ])
+
+    let content = '抱歉，AI 服务暂时不可用，请稍后再试。'
+    const sources: Source[] = []
+
+    // 处理AI响应
+    if (aiRes.data.code === 0) {
+      content = aiRes.data.data.content
+    }
+
+    // 处理案例数据
+    if (caseRes.data.code === 0 && caseRes.data.data.cases) {
+      const cases = caseRes.data.data.cases.slice(0, 3)
+      cases.forEach((c: any) => {
+        sources.push({
+          title: c.title || c.caseNumber,
+          type: 'case',
+          id: c.id
+        })
+      })
+    }
+
+    // 处理法规数据
+    if (lawRes.data.code === 0 && lawRes.data.data.laws) {
+      const laws = lawRes.data.data.laws.slice(0, 3)
+      laws.forEach((l: any) => {
+        sources.push({
+          title: l.name,
+          type: 'law',
+          id: l.id
+        })
+      })
+    }
+
+    return { content, sources }
+  } catch (e) {
+    console.error('AI调用失败', e)
+    return {
+      content: '抱歉，AI 服务暂时不可用，请稍后再试。',
+      sources: []
+    }
+  }
 }
 
 const scrollToBottom = async () => {
@@ -262,6 +336,41 @@ const scrollToBottom = async () => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.sources {
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx;
+  background: #f0f9ff;
+  border-radius: $radius-md;
+  border-left: 4rpx solid #1890ff;
+}
+
+.sources-title {
+  font-size: 24rpx;
+  color: #1890ff;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 0;
+  font-size: 24rpx;
+  color: $text-secondary;
+}
+
+.source-icon {
+  font-size: 24rpx;
+}
+
+.source-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .input-area {

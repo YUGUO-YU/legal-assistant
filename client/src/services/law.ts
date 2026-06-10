@@ -14,6 +14,7 @@ export interface LawItem {
   lawType: string
   effectiveDate: string
   status: string
+  source?: string
 }
 
 export interface LawSearchResponse {
@@ -37,7 +38,7 @@ export interface LawDetailResponse {
 export const lawApi = {
   search(params: LawSearchRequest) {
     return request<LawSearchResponse>({
-      url: '/api/v1/laws/search',
+      url: '/api/v1/legal/laws/search',
       method: 'GET',
       data: params
     })

@@ -76,6 +76,9 @@
           <text class="case-number">{{ item.caseNumber }}</text>
           <text class="case-court">{{ item.court }}</text>
         </view>
+        <view class="case-source" v-if="item.source">
+          <text class="source-tag">📋 {{ item.source }}</text>
+        </view>
       </view>
 
       <view v-if="loading" class="loading">
@@ -452,6 +455,21 @@ const goToDetail = (id: string) => {
 .case-court {
   max-width: 400rpx;
   @include ellipsis;
+}
+
+.case-source {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed $border-color;
+}
+
+.source-tag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: #f0f9ff;
+  color: #1890ff;
+  font-size: 22rpx;
+  border-radius: $radius-sm;
 }
 
 .loading, .no-more, .empty {
