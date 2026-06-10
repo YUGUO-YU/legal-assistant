@@ -306,6 +306,8 @@ function showServerConfig() {
 </script>
 
 <style lang="scss" scoped>
+@import '@/style/variables.scss';
+
 .login-container {
   min-height: 100vh;
   background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%, #ffffff 100%);

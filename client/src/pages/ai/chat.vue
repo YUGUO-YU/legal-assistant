@@ -219,9 +219,10 @@ const formatContent = (text: string): string => {
 
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
+    const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.1.32:8080'
     const [aiRes, caseRes, lawRes] = await Promise.all([
       uni.request({
-        url: 'http://localhost:8080/api/v1/ai/chat',
+        url: baseUrl + '/api/v1/ai/chat',
         method: 'POST',
         data: { message: question },
         header: {
@@ -230,10 +231,10 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
         }
       }),
       uni.request({
-        url: 'http://localhost:8080/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
+        url: baseUrl + '/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
       }),
       uni.request({
-        url: 'http://localhost:8080/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
+        url: baseUrl + '/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
       })
     ])
 
@@ -318,9 +319,10 @@ const sendMessage = async () => {
 
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
+    const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.1.32:8080'
     const [aiRes, caseRes, lawRes] = await Promise.all([
       uni.request({
-        url: 'http://localhost:8080/api/v1/ai/chat',
+        url: baseUrl + '/api/v1/ai/chat',
         method: 'POST',
         data: { message: question },
         header: {
@@ -329,10 +331,10 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
         }
       }),
       uni.request({
-        url: 'http://localhost:8080/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
+        url: baseUrl + '/api/v1/legal/cases/search?keyword=' + encodeURIComponent(question),
       }),
       uni.request({
-        url: 'http://localhost:8080/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
+        url: baseUrl + '/api/v1/legal/laws/search?keyword=' + encodeURIComponent(question),
       })
     ])
 
