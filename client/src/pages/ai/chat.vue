@@ -211,6 +211,7 @@ const formatContent = (text: string): string => {
   if (!text) return ''
 
   let html = text
+    .replace(/<think>[\s\S]*?<\/think>/g, '')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/^### (.+)$/gm, '<view class="h3">$1</view>')
