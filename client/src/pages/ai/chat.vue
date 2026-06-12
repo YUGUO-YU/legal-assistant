@@ -30,12 +30,15 @@
               <text class="loading-text">AI 思考中...</text>
             </view>
             <view class="sources" v-if="msg.sources && msg.sources.length > 0">
-              <view class="sources-title">来源：</view>
+              <view class="sources-title">📖 参考来源：</view>
               <text
                 v-for="(source, idx) in msg.sources"
                 :key="idx"
                 class="source-tag"
               >{{ source.title }}</text>
+            </view>
+            <view class="disclaimer" v-if="msg.role === 'assistant'">
+              <text>⚠️ 本回答仅供参考，不构成正式法律意见。如需专业法律帮助，请咨询执业律师。</text>
             </view>
           </view>
         </view>
@@ -46,7 +49,7 @@
       <input
         v-model="inputText"
         class="input"
-        placeholder="输入法律问题..."
+        placeholder="输入法律问题，咨询律师函、起诉状等文书起草..."
         @confirm="sendMessage"
         :disabled="sending"
       />
@@ -97,10 +100,11 @@ const scrollTop = ref(0)
 const scrollIntoView = ref('')
 
 const quickQuestions = [
-  '劳动纠纷怎么处理？',
-  '民间借贷利息怎么计算？',
-  '房屋租赁合同要注意什么？',
-  '交通事故责任如何划分？'
+  '起草一份律师函需要哪些要素？',
+  '民间借贷起诉状怎么写？',
+  '买卖合同审查有哪些重点？',
+  '劳动合同解除需要注意什么？',
+  '催告函和律师函有什么区别？'
 ]
 
 onMounted(() => {
@@ -183,24 +187,10 @@ const sendMessage = async () => {
 }
 
 const typeText = async (msgIndex: number, fullText: string, sources: Source[]) => {
-  const chars = fullText.split('')
-  const typeSpeed = 15
-  let currentContent = ''
-
-  for (let i = 0; i < chars.length; i++) {
-    currentContent += chars[i]
-
-    if (i % 50 === 0 || i === chars.length - 1) {
-      messages.value[msgIndex].displayedContent = currentContent
-      messages.value[msgIndex].isTyping = true
-      await scrollToBottom()
-      await new Promise(resolve => setTimeout(resolve, typeSpeed))
-    }
-  }
-
-  messages.value[msgIndex].displayedContent = currentContent
+  messages.value[msgIndex].displayedContent = fullText
   messages.value[msgIndex].isTyping = false
   messages.value[msgIndex].sources = sources
+  await scrollToBottom()
 }
 
 const formatContent = (text: string): string => {
@@ -512,6 +502,16 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
   background: #e6f4ff;
   padding: 4rpx 12rpx;
   border-radius: 4rpx;
+}
+
+.disclaimer {
+  margin-top: 16rpx;
+  padding: 12rpx 16rpx;
+  background: #fffbe6;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: #666;
+  line-height: 1.5;
 }
 
 .input-area {

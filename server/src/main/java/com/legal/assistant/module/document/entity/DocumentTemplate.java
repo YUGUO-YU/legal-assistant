@@ -1,7 +1,7 @@
 package com.legal.assistant.module.document.entity;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.annotation.*;
-import com.legal.assistant.common.typehandler.FastjsonTypeHandler;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -25,8 +25,8 @@ public class DocumentTemplate {
     
     private String filePath;
     
-    @TableField(typeHandler = FastjsonTypeHandler.class)
-    private List<TemplateVariable> variables;
+    @TableField("variables")
+    private String variablesJson;
     
     private Integer downloadCount;
     
@@ -40,4 +40,23 @@ public class DocumentTemplate {
     
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
+    
+    public List<TemplateVariable> getVariables() {
+        if (variablesJson == null || variablesJson.isEmpty()) {
+            return null;
+        }
+        try {
+            return JSON.parseArray(variablesJson, TemplateVariable.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public void setVariables(List<TemplateVariable> variables) {
+        if (variables == null) {
+            this.variablesJson = null;
+        } else {
+            this.variablesJson = JSON.toJSONString(variables);
+        }
+    }
 }

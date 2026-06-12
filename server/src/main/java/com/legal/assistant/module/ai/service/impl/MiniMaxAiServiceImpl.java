@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.legal.assistant.module.ai.dto.ChatRequest;
 import com.legal.assistant.module.ai.dto.ChatResponse;
 import com.legal.assistant.module.ai.service.AiService;
+import com.legal.assistant.module.rag.service.LegalRagService;
 import com.legal.assistant.module.search.service.WebSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,14 +40,19 @@ public class MiniMaxAiServiceImpl implements AiService {
     @Value("${ai.temperature:0.7}")
     private double temperature;
 
+    @Value("${ai.rag.auto-retrieve:true}")
+    private boolean autoRetrieveRag;
+
     private final HttpClient httpClient;
     private final WebSearchService searchService;
+    private final LegalRagService ragService;
 
-    public MiniMaxAiServiceImpl(WebSearchService searchService) {
+    public MiniMaxAiServiceImpl(WebSearchService searchService, LegalRagService ragService) {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
                 .build();
         this.searchService = searchService;
+        this.ragService = ragService;
     }
 
     @Override
@@ -75,6 +81,29 @@ public class MiniMaxAiServiceImpl implements AiService {
         if (hasWebSearch) {
             userPromptBuilder.append(webSearchResults.toString());
             userPromptBuilder.append("\n\n请根据以上网络搜索结果，用中文详细回答用户问题。回答要专业、实用，优先引用搜索到的来源。");
+        }
+
+        boolean needsAutoRag = autoRetrieveRag &&
+                (request.getLawSources() == null || request.getLawSources().isEmpty()) &&
+                (request.getCaseSources() == null || request.getCaseSources().isEmpty());
+
+        if (needsAutoRag) {
+            try {
+                Map<String, Object> ragContext = ragService.retrieveContext(request.getMessage(), 3, 2);
+                @SuppressWarnings("unchecked")
+                List<Map<String, String>> lawSources = (List<Map<String, String>>) ragContext.get("lawSources");
+                @SuppressWarnings("unchecked")
+                List<Map<String, String>> caseSources = (List<Map<String, String>>) ragContext.get("caseSources");
+                if (lawSources != null && !lawSources.isEmpty()) {
+                    request.setLawSources(lawSources);
+                }
+                if (caseSources != null && !caseSources.isEmpty()) {
+                    request.setCaseSources(caseSources);
+                }
+                log.info("RAG auto-retrieved: {} laws, {} cases", lawSources != null ? lawSources.size() : 0, caseSources != null ? caseSources.size() : 0);
+            } catch (Exception e) {
+                log.error("RAG retrieval failed", e);
+            }
         }
 
         if ((request.getLawSources() != null && !request.getLawSources().isEmpty()) ||
@@ -113,18 +142,26 @@ public class MiniMaxAiServiceImpl implements AiService {
         }
 
         try {
-            String systemPrompt = "你是一个专业的法律助手，名为法律小精灵。你的职责是：\n" +
-                    "1. 回答用户关于法律问题的咨询\n" +
-                    "2. 提供法律知识科普\n" +
-                    "3. 协助分析案情和提供建议\n" +
-                    "4. 帮助起草简单的法律文书\n" +
-                    "5. 语言要专业但易懂，温暖且有帮助\n\n" +
-                    "请注意：\n" +
-                    "- 必须根据提供的参考资料回答，不要编造法律条文\n" +
-                    "- 每个法律条文都要标注来源，如：【来源：《中华人民共和国合同法》第X条】\n" +
-                    "- 每个案例都要标注来源，如：【来源：XXX案】\n" +
-                    "- 如果资料不足，明确说明哪些内容是依据不足需要核实\n" +
-                    "- 如果涉及复杂案件，引导用户寻求专业律师帮助";
+            String systemPrompt = "你是一位资深执业律师，擅长民法、劳动法、合同法等领域。\n" +
+                    "你以专业的法律视角为用户提供帮助。\n\n" +
+                    "【回答规范】\n" +
+                    "1. 语言专业、严谨，条理清晰\n" +
+                    "2. 优先引用现行有效法律法规条文，标注条款编号\n" +
+                    "3. 参考案例需说明案件基本信息\n" +
+                    "4. 复杂问题提供多角度分析\n" +
+                    "5. 主动提示相关风险和注意事项\n\n" +
+                    "【格式要求】\n" +
+                    "- 使用 ## 标注二级标题\n" +
+                    "- 使用 ### 标注三级标题\n" +
+                    "- 使用 - 列举要点\n" +
+                    "- 法条引用格式：【《法名》第X条】\n\n" +
+                    "【免责声明】\n" +
+                    "- 明确说明本回答仅供参考，不构成正式法律意见\n" +
+                    "-涉及重大权益的问题，建议咨询执业律师\n\n" +
+                    "【文书生成引导】\n" +
+                    "- 如用户需要起草文书，主动询问关键要素\n" +
+                    "- 根据用户需求推荐合适的文书类型\n\n" +
+                    "请根据以上规范回答用户问题：";
 
             Map<String, Object> requestBody = Map.of(
                 "model", model,
