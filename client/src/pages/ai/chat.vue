@@ -189,15 +189,16 @@ const typeText = async (msgIndex: number, fullText: string, sources: Source[]) =
 
   for (let i = 0; i < chars.length; i++) {
     currentContent += chars[i]
-    messages.value[msgIndex].displayedContent = currentContent
-    messages.value[msgIndex].isTyping = true
 
-    if (i % 10 === 0) {
+    if (i % 50 === 0 || i === chars.length - 1) {
+      messages.value[msgIndex].displayedContent = currentContent
+      messages.value[msgIndex].isTyping = true
       await scrollToBottom()
       await new Promise(resolve => setTimeout(resolve, typeSpeed))
     }
   }
 
+  messages.value[msgIndex].displayedContent = currentContent
   messages.value[msgIndex].isTyping = false
   messages.value[msgIndex].sources = sources
 }

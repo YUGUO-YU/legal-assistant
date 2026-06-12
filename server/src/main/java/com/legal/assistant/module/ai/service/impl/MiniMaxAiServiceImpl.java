@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.legal.assistant.module.ai.dto.ChatRequest;
 import com.legal.assistant.module.ai.dto.ChatResponse;
 import com.legal.assistant.module.ai.service.AiService;
+import com.legal.assistant.module.search.service.WebSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,11 +40,13 @@ public class MiniMaxAiServiceImpl implements AiService {
     private double temperature;
 
     private final HttpClient httpClient;
+    private final WebSearchService searchService;
 
-    public MiniMaxAiServiceImpl() {
+    public MiniMaxAiServiceImpl(WebSearchService searchService) {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
                 .build();
+        this.searchService = searchService;
     }
 
     @Override
@@ -51,9 +54,32 @@ public class MiniMaxAiServiceImpl implements AiService {
         StringBuilder userPromptBuilder = new StringBuilder();
         userPromptBuilder.append(request.getMessage());
 
+        boolean hasWebSearch = false;
+        StringBuilder webSearchResults = new StringBuilder();
+
+        var webResults = searchService.search(request.getMessage(), 5);
+        if (!webResults.isEmpty()) {
+            hasWebSearch = true;
+            webSearchResults.append("\n\n=== 网络搜索结果 ===");
+            for (int i = 0; i < webResults.size(); i++) {
+                var result = webResults.get(i);
+                webSearchResults.append("\n").append(i + 1).append(". ").append(result.getTitle());
+                webSearchResults.append("\n   来源：").append(result.getUrl());
+                if (!result.getDescription().isEmpty()) {
+                    webSearchResults.append("\n   摘要：").append(result.getDescription());
+                }
+                webSearchResults.append("\n");
+            }
+        }
+
+        if (hasWebSearch) {
+            userPromptBuilder.append(webSearchResults.toString());
+            userPromptBuilder.append("\n\n请根据以上网络搜索结果，用中文详细回答用户问题。回答要专业、实用，优先引用搜索到的来源。");
+        }
+
         if ((request.getLawSources() != null && !request.getLawSources().isEmpty()) ||
             (request.getCaseSources() != null && !request.getCaseSources().isEmpty())) {
-            userPromptBuilder.append("\n\n=== 参考资料 ===");
+            userPromptBuilder.append("\n\n=== 法律资料库 ===");
 
             if (request.getLawSources() != null && !request.getLawSources().isEmpty()) {
                 userPromptBuilder.append("\n【相关法规】：\n");
