@@ -243,7 +243,7 @@ const scrollToBottom = async () => {
 
 const callAI = async (question: string): Promise<{ content: string, sources: Source[] }> => {
   try {
-    const baseUrl = uni.getStorageSync('baseUrl') || 'http://192.168.2.5:8080'
+    const baseUrl = uni.getStorageSync('baseUrl') || 'http://169.254.169.252:8080'
 
     const [caseRes, lawRes] = await Promise.all([
       uni.request({
