@@ -63,19 +63,23 @@ public class MiniMaxAiServiceImpl implements AiService {
         boolean hasWebSearch = false;
         StringBuilder webSearchResults = new StringBuilder();
 
-        var webResults = searchService.search(request.getMessage(), 5);
-        if (!webResults.isEmpty()) {
-            hasWebSearch = true;
-            webSearchResults.append("\n\n=== 网络搜索结果 ===");
-            for (int i = 0; i < webResults.size(); i++) {
-                var result = webResults.get(i);
-                webSearchResults.append("\n").append(i + 1).append(". ").append(result.getTitle());
-                webSearchResults.append("\n   来源：").append(result.getUrl());
-                if (!result.getDescription().isEmpty()) {
-                    webSearchResults.append("\n   摘要：").append(result.getDescription());
+        try {
+            var webResults = searchService.search(request.getMessage(), 5);
+            if (!webResults.isEmpty()) {
+                hasWebSearch = true;
+                webSearchResults.append("\n\n=== 网络搜索结果 ===");
+                for (int i = 0; i < webResults.size(); i++) {
+                    var result = webResults.get(i);
+                    webSearchResults.append("\n").append(i + 1).append(". ").append(result.getTitle());
+                    webSearchResults.append("\n   来源：").append(result.getUrl());
+                    if (!result.getDescription().isEmpty()) {
+                        webSearchResults.append("\n   摘要：").append(result.getDescription());
+                    }
+                    webSearchResults.append("\n");
                 }
-                webSearchResults.append("\n");
             }
+        } catch (Exception e) {
+            log.warn("Web search failed, continuing without search results: {}", e.getMessage());
         }
 
         if (hasWebSearch) {

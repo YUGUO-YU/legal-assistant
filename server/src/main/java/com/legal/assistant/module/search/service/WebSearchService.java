@@ -32,9 +32,15 @@ public class WebSearchService {
     @Value("${search.fallback.enabled:true}")
     private boolean fallbackEnabled;
 
+    @Value("${search.timeout.connect:5}")
+    private int connectTimeout;
+
+    @Value("${search.timeout.request:10}")
+    private int requestTimeout;
+
     public WebSearchService() {
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(15))
+                .connectTimeout(Duration.ofSeconds(5))
                 .build();
         this.objectMapper = new ObjectMapper();
     }
@@ -55,7 +61,7 @@ public class WebSearchService {
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Accept", "application/json")
-                    .timeout(Duration.ofSeconds(20));
+                    .timeout(Duration.ofSeconds(requestTimeout));
 
             if ("bing".equals(provider) && !apiKey.isEmpty()) {
                 requestBuilder.header("Ocp-Apim-Subscription-Key", apiKey);
@@ -69,7 +75,7 @@ public class WebSearchService {
                 log.warn("Search API returned status: {}", response.statusCode());
             }
         } catch (Exception e) {
-            log.error("Search error for query: {}", query, e);
+            log.warn("Search service unavailable, using fallback: {}", e.getMessage());
         }
 
         if (results.isEmpty() && fallbackEnabled) {
@@ -128,7 +134,7 @@ public class WebSearchService {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to parse search response", e);
+            log.warn("Failed to parse search response: {}", e.getMessage());
         }
 
         return results;
