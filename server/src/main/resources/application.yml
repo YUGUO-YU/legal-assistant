@@ -104,6 +104,13 @@ legal-data:
     provider: tianyancha
     api-key: ${TIANYANCHA_API_KEY:}
 
+legal:
+  assistant:
+    document:
+      template-dir: ${DOCUMENT_TEMPLATE_DIR:/workspace/server/templates}
+      output-dir: ${DOCUMENT_OUTPUT_DIR:/workspace/server/output}
+      file-retention-days: 7
+
 logging:
   level:
     com.legal.assistant: debug
