@@ -18,7 +18,7 @@
           </view>
           <view class="content">
             <view class="text" v-if="msg.displayedContent !== undefined">
-              <rich-text :nodes="formatContent(msg.displayedContent)"></rich-text>
+              <rich-text :nodes="getFormattedContent(msg.displayedContent)"></rich-text>
               <view class="typing-cursor" v-if="msg.isTyping"></view>
             </view>
             <view class="loading" v-else-if="msg.isLoading">
@@ -98,6 +98,7 @@ const inputText = ref('')
 const sending = ref(false)
 const scrollTop = ref(0)
 const scrollIntoView = ref('')
+const contentCache = new Map<string, string>()
 
 const quickQuestions = [
   '起草一份律师函需要哪些要素？',
@@ -193,8 +194,12 @@ const typeText = async (msgIndex: number, fullText: string, sources: Source[]) =
   await scrollToBottom()
 }
 
-const formatContent = (text: string): string => {
+const getFormattedContent = (text: string): string => {
   if (!text) return ''
+
+  if (contentCache.has(text)) {
+    return contentCache.get(text)!
+  }
 
   let html = text.replace(/<[^>]+>/g, '')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
@@ -219,6 +224,13 @@ const formatContent = (text: string): string => {
   html = html.replace(/(<\/strong>)<\/p>/g, '$1')
   html = html.replace(/<p>(<em>)/g, '$1')
   html = html.replace(/(<\/em>)<\/p>/g, '$1')
+
+  contentCache.set(text, html)
+
+  if (contentCache.size > 100) {
+    const firstKey = contentCache.keys().next().value
+    contentCache.delete(firstKey)
+  }
 
   return html
 }
