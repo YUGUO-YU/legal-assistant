@@ -30,17 +30,12 @@
               <text class="loading-text">AI 思考中...</text>
             </view>
             <view class="sources" v-if="msg.sources && msg.sources.length > 0">
-              <view class="sources-title">📚 参考资料</view>
-              <view class="sources-note">以下为相关法律法规及案例摘要，仅供参考</view>
-              <view
+              <view class="sources-title">来源：</view>
+              <text
                 v-for="(source, idx) in msg.sources"
                 :key="idx"
-                class="source-item"
-              >
-                <text class="source-icon">{{ source.type === 'case' ? '📋' : '📜' }}</text>
-                <text class="source-text">{{ source.title }}</text>
-                <text class="source-type">{{ source.type === 'case' ? '案例' : '法规' }}</text>
-              </view>
+                class="source-tag"
+              >{{ source.title }}</text>
             </view>
           </view>
         </view>
@@ -210,7 +205,7 @@ const typeText = async (msgIndex: number, fullText: string, sources: Source[]) =
 const formatContent = (text: string): string => {
   if (!text) return ''
 
-  let html = text
+  let html = text.replace(/<[^>]+>/g, '')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -219,7 +214,7 @@ const formatContent = (text: string): string => {
     .replace(/^# (.+)$/gm, '<view class="h1">$1</view>')
     .replace(/^- (.+)$/gm, '<view class="list-item">$1</view>')
     .replace(/^(\d+)\. (.+)$/gm, '<view class="list-item-num">$1. $2</view>')
-    .replace(/>(.+)$/gm, '<view class="quote">$1</view>')
+    .replace(/^> (.+)$/gm, '<view class="quote">$1</view>')
     .replace(/\n{3,}/g, '\n\n')
     .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br/>')
@@ -494,61 +489,28 @@ const callAI = async (question: string): Promise<{ content: string, sources: Sou
 }
 
 .sources {
-  margin-top: 24rpx;
-  padding: 20rpx 24rpx;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e6f4ff 100%);
-  border-radius: $radius-md;
-  border: 1rpx solid #91caff;
-}
-
-.sources-title {
-  font-size: 24rpx;
-  color: #1890ff;
-  font-weight: 600;
-  margin-bottom: 12rpx;
+  margin-top: 16rpx;
+  padding: 12rpx 16rpx;
+  background: #f5f5f5;
+  border-radius: $radius-sm;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8rpx;
 }
 
-.sources-note {
-  font-size: 20rpx;
-  color: #8c8c8c;
-  margin-bottom: 12rpx;
-  font-style: italic;
-}
-
-.source-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8rpx;
-  padding: 10rpx 0;
+.sources-title {
   font-size: 24rpx;
-  color: $text-regular;
-  border-bottom: 1rpx solid #e5e7eb;
-
-  &:last-child {
-    border-bottom: none;
-  }
+  color: #666;
+  font-weight: 500;
 }
 
-.source-icon {
-  font-size: 24rpx;
-  flex-shrink: 0;
-  margin-top: 2rpx;
-}
-
-.source-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.source-type {
-  font-size: 20rpx;
-  color: #8c8c8c;
-  flex-shrink: 0;
+.source-tag {
+  font-size: 22rpx;
+  color: #1890ff;
+  background: #e6f4ff;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
 }
 
 .input-area {
